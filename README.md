@@ -1,5 +1,10 @@
 # bit_game
 
+## URL
+```
+https://masafiro.github.io/bit_game/src/index.html
+```
+
 ## local での実行の仕方
 ```
 python3 -m http.server 8000    
