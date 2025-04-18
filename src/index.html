@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>5ビット Cyclic Shift</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    #bitDisplay {
+      font-size: 40px;
+      letter-spacing: 10px;
+      margin: 20px;
+    }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>5ビット Cyclic Shift</h1>
+  <div id="bitDisplay">10101</div>
+  <button onclick="cyclicShiftRight()">右シフト</button>
+  <button onclick="cyclicShiftLeft()">左シフト</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
