@@ -20,6 +20,6 @@
         "operation_type": "cyclic-rshift"
       }
     ],
-    "minumum-moves": 2
+    "minumum_moves": 2
   }
 }
