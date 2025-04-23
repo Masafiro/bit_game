@@ -1,44 +1,46 @@
-let bits = 0b10101;  // 2進数で 21
+let bits = "10101";  // 2進数文字列として扱う
 
 const BIT_WIDTH = 5;
 
 function updateDisplay() {
-  const bitStr = bits.toString(2).padStart(BIT_WIDTH, "0");
-  document.getElementById("bitDisplay").textContent = bitStr;
+  document.getElementById("bitDisplay").textContent = bits;
 }
 
 function cyclicShiftRight() {
-  const lsb = bits & 1;
-  bits = (bits >> 1) | (lsb << (BIT_WIDTH - 1));
-  bits &= (1 << BIT_WIDTH) - 1;
+  bits = bits[bits.length - 1] + bits.slice(0, bits.length - 1);
   updateDisplay();
 }
 
 function cyclicShiftLeft() {
-  const msb = (bits >> (BIT_WIDTH - 1)) & 1;
-  bits = ((bits << 1) | msb) & ((1 << BIT_WIDTH) - 1);
+  bits = bits.slice(1) + bits[0];
   updateDisplay();
 }
 
 function andBits(maskStr) {
-  const mask = parseInt(maskStr, 2);
-  bits &= mask;
+  let result = "";
+  for (let i = 0; i < BIT_WIDTH; i++) {
+    result += (bits[i] === "1" && maskStr[i] === "1") ? "1" : "0";
+  }
+  bits = result;
   updateDisplay();
 }
 
 function xorBits(maskStr) {
-  const mask = parseInt(maskStr, 2);
-  bits ^= mask;
+  let result = "";
+  for (let i = 0; i < BIT_WIDTH; i++) {
+    result += (bits[i] !== maskStr[i]) ? "1" : "0";
+  }
+  bits = result;
   updateDisplay();
 }
 
 function loadAndUpdateBit() {
-  fetch("example.json")  // `bit.json` というファイル名だと仮定
+  fetch("example.json")
     .then(response => response.json())
     .then(data => {
-      bits = data.bit;  // `bit` の値を取得
+      bits = data.bit;  // 念のため明示的に文字列にする
       console.log("読み込んだビット:", data.bit);
-      console.log(bits)
+      console.log("現在の bits（文字列）:", bits);
       updateDisplay();  // 表示を更新
     })
     .catch(error => {
