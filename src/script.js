@@ -35,11 +35,12 @@ function xorBits(maskStr) {
 }
 
 function loadAndUpdateBit() {
-  fetch("example.json")
+  fetch("../problems/example_problem.json")
     .then(response => response.json())
     .then(data => {
-      bits = data.bit;  // 念のため明示的に文字列にする
-      console.log("読み込んだビット:", data.bit);
+      console.log("長さ:", data.problem.bit_length)
+      bits = data.problem.start;  // 念のため明示的に文字列にする
+      console.log("読み込んだビット:", data.problem.start);
       console.log("現在の bits（文字列）:", bits);
       updateDisplay();  // 表示を更新
     })
