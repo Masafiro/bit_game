@@ -26,11 +26,11 @@
 <body>
   <h1>5ビット Cyclic Shift</h1>
   <div id="bitDisplay">10101</div>
-  <button onclick="cyclicShiftRight()">右シフト</button>
-  <button onclick="cyclicShiftLeft()">左シフト</button>
-  <button onclick="andBits('10101')">and10101</button>
-  <button onclick="xorBits('10101')">xor10101</button>
-  <button onclick="loadAndUpdateBit()">ロード</button>
+  <button onclick="operate(0)">操作 1 (xor10011)</button>
+  <button onclick="operate(1)">操作 2 (or10001)</button>
+  <button onclick="operate(2)">操作 3 (左シフト)</button>
+  <button onclick="operate(3)">操作 4 (右シフト)</button>
+  <button onclick="loadProblem()">ロード</button>
 
 
   <script src="script.js"></script>

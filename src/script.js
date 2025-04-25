@@ -1,4 +1,5 @@
 let bits = "10101";  // 2進数文字列として扱う
+var problem;
 
 const BIT_WIDTH = 5;
 
@@ -34,14 +35,36 @@ function xorBits(maskStr) {
   updateDisplay();
 }
 
-function loadAndUpdateBit() {
+function operate(operationId) {
+  console.log(problem.operations);
+  let operation = problem.operations[operationId];
+  let operationType = operation.operation_type;
+  console.log(operation);
+  switch (operationType) {
+    case "xor":
+      xorBits(operation.parameter);
+      break;
+    case "or":
+      orBits(operation.parameter);
+      break;
+    case "cyclic-lshift":
+      cyclicShiftLeft();
+      break;
+    case "cyclic-rshift":
+      cyclicShiftRight();
+      break;
+  }
+}
+function loadProblem() {
   fetch("../problems/example_problem.json")
     .then(response => response.json())
     .then(data => {
-      console.log("長さ:", data.problem.bit_length)
-      bits = data.problem.start;  // 念のため明示的に文字列にする
-      console.log("読み込んだビット:", data.problem.start);
+      problem = data.problem;
+      console.log("長さ:", problem.bit_length)
+      bits = problem.start;
+      console.log("読み込んだビット:", problem.start);
       console.log("現在の bits（文字列）:", bits);
+      console.log(problem);
       updateDisplay();  // 表示を更新
     })
     .catch(error => {
