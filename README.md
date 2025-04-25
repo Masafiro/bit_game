@@ -37,3 +37,4 @@ git push origin your-branch-name
 4. 変更を GitHub 上で main に反映したいとき
 GitHub の画面から「Pull Request」を作成して、main にマージ（取り込み）する
 
+
