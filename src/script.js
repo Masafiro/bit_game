@@ -25,6 +25,51 @@ function andBits(maskStr) {
   updateDisplay();
 }
 
+function orBits(maskStr) {
+  let result = "";
+  for (let i = 0; i < BIT_WIDTH; i++) {
+    result += (bits[i] === "1" || maskStr[i] === "1") ? "1" : "0";
+  }
+  bits = result;
+  updateDisplay();
+}
+
+function notBits() {
+  let result = "";
+  for (let i = 0; i < BIT_WIDTH; i++) {
+    result += (bits[i] === "1") ? "0" : "1";
+  }
+  bits = result;
+  updateDisplay();
+}
+
+function nandBits(maskStr) {
+  let result = "";
+  for (let i = 0; i < BIT_WIDTH; i++) {
+    result += (bits[i] === "1" && maskStr[i] === "1") ? "0" : "1";
+  }
+  bits = result;
+  updateDisplay();
+}
+
+function norBits(maskStr) {
+  let result = "";
+  for (let i = 0; i < BIT_WIDTH; i++) {
+    result += (bits[i] === "1" || maskStr[i] === "1") ? "0" : "1";
+  }
+  bits = result;
+  updateDisplay();
+}
+
+function xnorBits(maskStr) {
+  let result = "";
+  for (let i = 0; i < BIT_WIDTH; i++) {
+    result += (bits[i] === maskStr[i]) ? "1" : "0";
+  }
+  bits = result;
+  updateDisplay();
+}
+
 function xorBits(maskStr) {
   let result = "";
   for (let i = 0; i < BIT_WIDTH; i++) {
