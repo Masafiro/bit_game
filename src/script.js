@@ -114,7 +114,7 @@ function getOperationText(operation){
   }
 }
 function loadProblem() {
-  fetch("../problems/example_problem.json")
+  fetch("../problems/example_problem1.json")
     .then(response => response.json())
     .then(data => {
       problem = data.problem;
