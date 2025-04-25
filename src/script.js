@@ -105,11 +105,11 @@ function getOperationText(operation) {
     case "cyclic-rshift":
       return "右シフト"
     case "and":
-      return "AN " + operation.parameter;
+      return "AND " + operation.parameter;
     case "or":
       return "OR " + operation.parameter;
     case "not":
-      return "NOT ";
+      return "NOT";
     case "nand":
       return "NAND " + operation.parameter;
     case "nor":
