@@ -1,14 +1,12 @@
-let bits = "10101";  // 2進数文字列として扱う
+var bits;  // 2進数文字列として扱う
 var problem;
-
-const BIT_WIDTH = 5;
 
 function updateDisplay() {
   document.getElementById("bitDisplay").textContent = bits;
 }
 
 function cyclicShiftRight() {
-  bits = bits[bits.length - 1] + bits.slice(0, bits.length - 1);
+  bits = bits[problem.bit_length - 1] + bits.slice(0, problem.bit_length - 1);
   updateDisplay();
 }
 
@@ -19,7 +17,7 @@ function cyclicShiftLeft() {
 
 function andBits(maskStr) {
   let result = "";
-  for (let i = 0; i < BIT_WIDTH; i++) {
+  for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] === "1" && maskStr[i] === "1") ? "1" : "0";
   }
   bits = result;
@@ -28,7 +26,7 @@ function andBits(maskStr) {
 
 function orBits(maskStr) {
   let result = "";
-  for (let i = 0; i < BIT_WIDTH; i++) {
+  for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] === "1" || maskStr[i] === "1") ? "1" : "0";
   }
   bits = result;
@@ -37,7 +35,7 @@ function orBits(maskStr) {
 
 function notBits() {
   let result = "";
-  for (let i = 0; i < BIT_WIDTH; i++) {
+  for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] === "1") ? "0" : "1";
   }
   bits = result;
@@ -46,7 +44,7 @@ function notBits() {
 
 function nandBits(maskStr) {
   let result = "";
-  for (let i = 0; i < BIT_WIDTH; i++) {
+  for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] === "1" && maskStr[i] === "1") ? "0" : "1";
   }
   bits = result;
@@ -55,7 +53,7 @@ function nandBits(maskStr) {
 
 function norBits(maskStr) {
   let result = "";
-  for (let i = 0; i < BIT_WIDTH; i++) {
+  for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] === "1" || maskStr[i] === "1") ? "0" : "1";
   }
   bits = result;
@@ -64,7 +62,7 @@ function norBits(maskStr) {
 
 function xnorBits(maskStr) {
   let result = "";
-  for (let i = 0; i < BIT_WIDTH; i++) {
+  for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] === maskStr[i]) ? "1" : "0";
   }
   bits = result;
@@ -73,7 +71,7 @@ function xnorBits(maskStr) {
 
 function xorBits(maskStr) {
   let result = "";
-  for (let i = 0; i < BIT_WIDTH; i++) {
+  for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] !== maskStr[i]) ? "1" : "0";
   }
   bits = result;
@@ -81,10 +79,9 @@ function xorBits(maskStr) {
 }
 
 function operate(operationId) {
-  console.log(problem.operations);
   let operation = problem.operations[operationId];
-  let operationType = operation.operation_type;
   console.log(operation);
+  let operationType = operation.operation_type;
   switch (operationType) {
     case "xor":
       xorBits(operation.parameter);
@@ -100,53 +97,39 @@ function operate(operationId) {
       break;
   }
 }
+
+function getOperationText(operation){
+  let operationType = operation.operation_type;
+  switch (operationType) {
+    case "xor":
+      return "xor" + operation.parameter;
+    case "and":
+      return "and" + operation.parameter;
+    case "or":
+      return "or" + operation.parameter;
+    case "cyclic-lshift":
+      return "左シフト"
+    case "cyclic-rshift":
+      return "右シフト"
+  }
+}
 function loadProblem() {
   fetch("../problems/example_problem.json")
     .then(response => response.json())
     .then(data => {
       problem = data.problem;
-      console.log("長さ:", problem.bit_length)
-      bits = problem.start;
-      console.log("読み込んだビット:", problem.start);
-      console.log("現在の bits（文字列）:", bits);
       console.log(problem);
-      updateDisplay();  // 表示を更新
+      console.log(problem.operations[0]);
+
+      bits = problem.start;
+      //表示を更新
+      document.getElementById("bitDisplay").textContent = problem.start;
+      document.getElementById("operation1").textContent = getOperationText(problem.operations[0]);
+      document.getElementById("operation2").textContent = getOperationText(problem.operations[1]);
+      document.getElementById("operation3").textContent = getOperationText(problem.operations[2]);
+      document.getElementById("operation4").textContent = getOperationText(problem.operations[3]);
     })
     .catch(error => {
       console.error("ビットの読み込みに失敗しました:", error);
-    });
+    });  
 }
-
-// function loadProblem() {
-//   fetch("../problems/problem.json")
-//     .then(response => response.json())
-//     .then(data => {
-//       const problem = data.problem;
-//       const bitLength = problem.bit_length;
-//       let bits = problem.start;
-
-//       // 問題に基づいた操作を実行
-//       problem.operations.forEach(op => {
-//         switch (op.operation_type) {
-//           case "xor":
-//             xorBits(bits, op.parameter);
-//             break;
-//           case "or":
-//             orBits(bits, op.parameter);
-//             break;
-//           case "cyclic-lshift":
-//             cyclicShiftLeft(bits);
-//             break;
-//           case "cyclic-rshift":
-//             cyclicShiftRight(bits);
-//             break;
-//         }
-//       });
-
-//       // 目標状態の表示
-//       console.log(`最終的な状態: ${bits}`);
-//     })
-//     .catch(error => {
-//       console.error("問題の読み込みに失敗しました:", error);
-//     });
-// }
