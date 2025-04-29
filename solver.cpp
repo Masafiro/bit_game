@@ -45,6 +45,7 @@
 #include <queue>
 #include <iostream>
 #include <set>
+#include "solver.h"
 using namespace std;
 
 
