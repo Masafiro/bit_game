@@ -18,6 +18,7 @@ function andBits(bits, mask) {
 }
 
 function orBits(bits, maskStr) {
+  let result = "";
   for (let i = 0; i < problem.bit_length; i++) {
     result += (bits[i] === "1" || maskStr[i] === "1") ? "1" : "0";
   }
@@ -70,7 +71,7 @@ function getOperationResult(bits, operation){
     case "cyclic-lshift":
       return cyclicShiftLeft(bits);
     case "cyclic-rshift":
-      return cyclicShiftReft(bits);
+      return cyclicShiftRight(bits);
     case "and":
       return andBits(bits, operation.parameter);
     case "or":
