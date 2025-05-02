@@ -18,8 +18,8 @@ type BitOperation =
 
   
 type Status =
-  | "ProblemSelectionScreen"
-  | "GameScreen"
+  | {status_type: "ProblemSelectionScreen"}
+  | {status_type: "GameScreen", problem_file: string}
 
 
 function bitReducer(state: Bit, action: BitOperation): Bit {
@@ -96,9 +96,9 @@ function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ProblemButton({ problem, setStatus }: { problem: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
+function ProblemButton({ problem, problemFile, setStatus }: { problem: string, problemFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
   return (
-    <button className="problemButton" onClick={() => setStatus("GameScreen")}>
+    <button className="problemButton" onClick={() => setStatus({status_type: "GameScreen", problem_file: {problemFile: {problemFile}}})}>
       {problem}
     </button>
   );
@@ -108,9 +108,9 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
   return (
     <div>
       <ProblemButtonContainer>
-        <ProblemButton problem="Problem 1" setStatus={setStatus} />
-        <ProblemButton problem="Problem 2" setStatus={setStatus} />
-        <ProblemButton problem="Problem 3" setStatus={setStatus} />
+        <ProblemButton problem="Problem 1" problemFile="problem1.json" setStatus={setStatus} />
+        <ProblemButton problem="Problem 2" problemFile="problem2.json" setStatus={setStatus} />
+        <ProblemButton problem="Problem 3" problemFile="problem3.json" setStatus={setStatus} />
       </ProblemButtonContainer>
     </div>
   );
@@ -119,20 +119,20 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
 function ReturnToProblemSelectionButton({ setStatus } : { setStatus : React.Dispatch<React.SetStateAction<Status>>}){
   return (
     <div>
-      <button className="returnToProblemSelectionButton" onClick={() => setStatus("ProblemSelectionScreen")}>
+      <button className="returnToProblemSelectionButton" onClick={() => setStatus({status_type: "ProblemSelectionScreen"})}>
         戻る
       </button>
     </div>
   )
 }
 
-function Game({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<Status>>}) {
+function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFile: string}) {
   const [bit, dispatch] = useReducer(bitReducer, "-----");
   const [operations, setOperations] = useState<BitOperation[]>([]);
 
   useEffect(() => {
     async function fetchOperations() {
-      const response = await fetch("/problems/problem1.json");
+      const response = await fetch("/problems/" + problemFile.problemFile.problemFile);
       const data = await response.json();
       setOperations(data.problem.operations);
       dispatch({"operation_type": "set", "parameter": data.problem.start});
@@ -154,12 +154,13 @@ function Game({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<St
 }
 
 export default function Home() {
-  const [status, setStatus] = useState<Status>("ProblemSelectionScreen");
-  switch (status){
+  const [status, setStatus] = useState<Status>({status_type: "ProblemSelectionScreen"});
+  switch (status.status_type){
     case "ProblemSelectionScreen":
       return (
         <div>
           <h1 className="title">Bit Breaker</h1>
+          {status.status_type}
           <ProblemSelection setStatus={setStatus} />
         </div>
       );
@@ -167,7 +168,9 @@ export default function Home() {
       return (
         <div>
           <h1 className="title">Bit Breaker</h1>
-          <Game setStatus={setStatus}/>
+          {status.status_type}
+          {status.problem_file.problemFile.problemFile}
+          <Game setStatus={setStatus} problemFile={status.problem_file}/>
         </div>
       );
   }
