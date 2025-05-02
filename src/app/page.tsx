@@ -160,7 +160,9 @@ export default function Home() {
       return (
         <div>
           <h1 className="title">Bit Breaker</h1>
-          {status.status_type}
+          <div>
+            status_type: {status.status_type}
+          </div>
           <ProblemSelection setStatus={setStatus} />
         </div>
       );
@@ -168,8 +170,12 @@ export default function Home() {
       return (
         <div>
           <h1 className="title">Bit Breaker</h1>
-          {status.status_type}
-          {status.problem_file}
+          <div>
+            status_type: {status.status_type}
+          </div>
+          <div>
+            problem_file: {status.problem_file}
+          </div>
           <Game setStatus={setStatus} problemFile={status.problem_file}/>
         </div>
       );
