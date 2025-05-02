@@ -1,8 +1,25 @@
 {
-    "operations": [
-      { "type": "OR", "parameter": { "value": "10101", "length": 5 } },
-      { "type": "XOR", "parameter": { "value": "10001", "length": 5 } },
-      { "type": "NOT" },
-      { "type": "CYCLIC RIGHT SHIFT" }
-    ]
+    "problem": {
+      "bit_length": 4,
+      "start": "0011",
+      "target": "1001",
+      "operation_count": 4,
+      "operations": [
+        {
+          "operation_type": "and",
+          "parameter": "0111"
+        },
+        {
+          "operation_type": "xor",
+          "parameter": "1011"
+        },
+        {
+          "operation_type": "cyclic-lshift"
+        },
+        {
+          "operation_type": "cyclic-rshift"
+        }
+      ],
+      "minumum_moves": 2
+    }
   }

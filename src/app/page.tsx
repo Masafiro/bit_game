@@ -8,13 +8,13 @@ type Bit = string;
 
 
 type BitOperation = 
-  | {type: "SET", parameter: Bit}
-  | {type: "AND", parameter: Bit}
-  | {type: "OR", parameter: Bit}
-  | {type: "XOR", parameter: Bit}
-  | {type: "NOT"}
-  | {type: "CYCLIC LEFT SHIFT"}
-  | {type: "CYCLIC RIGHT SHIFT"}
+  | {operation_type: "set", parameter: Bit}
+  | {operation_type: "and", parameter: Bit}
+  | {operation_type: "or", parameter: Bit}
+  | {operation_type: "xor", parameter: Bit}
+  | {operation_type: "not"}
+  | {operation_type: "cyclic-lshift"}
+  | {operation_type: "cyclic-rshift"}
 
   
 type Status =
@@ -23,40 +23,40 @@ type Status =
 
 
 function bitReducer(state: Bit, action: BitOperation): Bit {
-  switch (action.type) {
-    case "SET": {
+  switch (action.operation_type) {
+    case "set": {
       return action.parameter;
     }
-    case "AND": {
+    case "and": {
       const newState = state.split("").map((bit, index) => {
         return (bit === "1" && action.parameter[index] === "1") ? "1" : "0";
       }).join("");
       return newState;
     }
-    case "OR": {
+    case "or": {
       const newState = state.split("").map((bit, index) => {
         return (bit === "1" || action.parameter[index] === "1") ? "1" : "0";
       }).join("");
       return newState;
     }
-    case "XOR": {
+    case "xor": {
       const newState = state.split("").map((bit, index) => {
         return (bit === "1" && action.parameter[index] === "0") || (bit === "0" && action.parameter[index] === "1") ? "1" : "0";
       }
       ).join("");
       return newState;
     }
-    case "NOT": {
+    case "not": {
       const newState = state.split("").map((bit) => {
         return (bit === "1") ? "0" : "1";
       }).join("");
       return newState;
     }
-    case "CYCLIC LEFT SHIFT": {
+    case "cyclic-lshift": {
       const newState = state.slice(1) + state[0];
       return newState;
     }
-    case "CYCLIC RIGHT SHIFT": {
+    case "cyclic-rshift": {
       const newState = state[state.length - 1] + state.slice(0, -1);
       return newState;
     }
@@ -68,7 +68,7 @@ function bitReducer(state: Bit, action: BitOperation): Bit {
 function BitOperationButton({ dispatch, operation }: { dispatch: React.Dispatch<BitOperation>; operation: BitOperation }) {
   return (
     <button className="bitOperationButton" onClick={() => dispatch({ ...operation})}>
-      {operation.type}
+      {operation.operation_type}
       {"parameter" in operation && ` ${operation.parameter}`}
     </button>
   )
@@ -110,6 +110,7 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
       <ProblemButtonContainer>
         <ProblemButton problem="Problem 1" setStatus={setStatus} />
         <ProblemButton problem="Problem 2" setStatus={setStatus} />
+        <ProblemButton problem="Problem 3" setStatus={setStatus} />
       </ProblemButtonContainer>
     </div>
   );
@@ -133,8 +134,8 @@ function Game({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<St
     async function fetchOperations() {
       const response = await fetch("/problems/problem1.json");
       const data = await response.json();
-      setOperations(data.operations);
-      dispatch({"type": "SET", "parameter": data.start});
+      setOperations(data.problem.operations);
+      dispatch({"operation_type": "set", "parameter": data.problem.start});
     }
     fetchOperations();
   }, []); 
