@@ -47,14 +47,9 @@
 #include <set>
 using namespace std;
 
-int n;
-unsigned int start;
-int m;
-unsigned int target;
-vector<pair<string,unsigned int>> operation;
-set<int> counted;
 
-vector<int> solver(int turn_limit){
+vector<int> solver(int n, int m, unsigned int start, unsigned int target,
+    vector<pair<string,unsigned int>> &operation, set<int> &counted, int turn_limit){
     queue<pair<unsigned int, vector<int>>> que;
     vector<int> initial;
     que.push(make_pair(start, initial));
@@ -180,6 +175,13 @@ vector<int> solver(int turn_limit){
 }
 
 int main(){
+    int n;
+    unsigned int start;
+    int m;
+    unsigned int target;
+    vector<pair<string,unsigned int>> operation;
+    set<int> counted;
+
     cin >> n;
     string input_start;
     cin >> input_start;
@@ -205,7 +207,7 @@ int main(){
 
     int turn_limit = 10;
 
-    vector<int> answer = solver(turn_limit);
+    vector<int> answer = solver(n, m, start, target, operation, counted, turn_limit);
     int sz = answer.size();
     for(int i = 0; i < sz; i++){
         cout << (i+1) << ": operation " << answer[i] <<endl;
