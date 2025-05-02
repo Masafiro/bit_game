@@ -4,16 +4,7 @@
 import { useEffect, useState, useReducer } from "react";
 
 
-interface Bit {
-  value: string;
-  length: number;
-}
-
-
-const initialState: Bit = {
-  value: "00000",
-  length: 5,
-};
+type Bit = string;
 
 
 type BitOperation = 
@@ -24,48 +15,49 @@ type BitOperation =
   | {type: "CYCLIC LEFT SHIFT"}
   | {type: "CYCLIC RIGHT SHIFT"}
 
+  
+type Status =
+  | "ProblemSelectionScreen"
+  | "GameScreen"
+
 
 function bitReducer(state: Bit, action: BitOperation): Bit {
-  if ("parameter" in action) {
-    if (action.parameter.length !== state.length) {
-      throw new Error("Bit length mismatch");
-    }
-  }
   switch (action.type) {
     case "AND": {
-      const newValue = state.value.split("").map((bit, index) => {
-        return (bit === "1" && action.parameter.value[index] === "1") ? "1" : "0";
+      const newState = state.split("").map((bit, index) => {
+        return (bit === "1" && action.parameter[index] === "1") ? "1" : "0";
       }).join("");
-      return { ...state, value: newValue };
+      return newState;
     }
     case "OR": {
-      const newValue = state.value.split("").map((bit, index) => {
-        return (bit === "1" || action.parameter.value[index] === "1") ? "1" : "0";
+      const newState = state.split("").map((bit, index) => {
+        return (bit === "1" || action.parameter[index] === "1") ? "1" : "0";
       }).join("");
-      return { ...state, value: newValue };
+      return newState;
     }
     case "XOR": {
-      const newValue = state.value.split("").map((bit, index) => {
-        return (bit === "1" && action.parameter.value[index] === "0") || (bit === "0" && action.parameter.value[index] === "1") ? "1" : "0";
-      }).join("");
-      return { ...state, value: newValue };
+      const newState = state.split("").map((bit, index) => {
+        return (bit === "1" && action.parameter[index] === "0") || (bit === "0" && action.parameter[index] === "1") ? "1" : "0";
+      }
+      ).join("");
+      return newState;
     }
     case "NOT": {
-      const newValue = state.value.split("").map((bit) => {
+      const newState = state.split("").map((bit) => {
         return (bit === "1") ? "0" : "1";
       }).join("");
-      return { ...state, value: newValue };
+      return newState;
     }
     case "CYCLIC LEFT SHIFT": {
-      const newValue = state.value.slice(1) + state.value[0];
-      return { ...state, value: newValue };
+      const newState = state.slice(1) + state[0];
+      return newState;
     }
     case "CYCLIC RIGHT SHIFT": {
-      const newValue = state.value[state.value.length - 1] + state.value.slice(0, -1);
-      return { ...state, value: newValue };
+      const newState = state[state.length - 1] + state.slice(0, -1);
+      return newState;
     }
     default:
-      throw new Error("Unknown Bit operation type");
+      throw new Error("Unknown operation");
   }
 }
 
@@ -77,7 +69,7 @@ function BitOperationButton({ dispatch, operation }: {
   return (
     <button className="bitOperationButton" onClick={() => dispatch({ ...operation})}>
       {operation.type}
-      {"parameter" in operation && ` ${operation.parameter.value}`}
+      {"parameter" in operation && ` ${operation.parameter}`}
     </button>
   )
 }
@@ -93,20 +85,47 @@ function BitOperationButtonContainer({ children }: { children: React.ReactNode }
 
 function BitDisplay({ currentBits }: { currentBits: Bit }) {
   return (
-    <div className="bitDisplay"> {currentBits.value} </div>
+    <div className="bitDisplay"> {currentBits} </div>
   )
+}
+
+function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="problemButtonContainer">
+      {children}
+    </div>
+  );
+}
+
+function ProblemButton({ problem }: { problem: string }) {
+  return (
+    <button className="problemButton">
+      {problem}
+    </button>
+  );
+}
+
+function ProblemSelection() {
+  return (
+    <div>
+      <ProblemButtonContainer>
+        <ProblemButton problem="Problem 1" />
+        <ProblemButton problem="Problem 2" />
+      </ProblemButtonContainer>
+    </div>
+  );
 }
 
 
 function Game (){
-  const [bit, dispatch] = useReducer(bitReducer, initialState);
+  const [bit, dispatch] = useReducer(bitReducer, "-----");
   const [operations, setOperations] = useState<BitOperation[]>([]);
 
   // useEffect(() => {
   //   const newOperations: BitOperation[] = [
-  //     { type: "AND", parameter: { value: "11101", length: 5 } },
-  //     { type: "OR", parameter: { value: "10101", length: 5 } },
-  //     { type: "XOR", parameter: { value: "10001", length: 5 } },
+  //     { type: "AND", parameter: "11101"},
+  //     { type: "OR", parameter:"10101" },
+  //     { type: "XOR", parameter: "10001" },
   //     { type: "NOT" },
   //     { type: "CYCLIC LEFT SHIFT" },
   //   ];
@@ -115,7 +134,7 @@ function Game (){
 
   useEffect(() => {
     async function fetchOperations() {
-      const response = await fetch("/problems/problem0.json");
+      const response = await fetch("/problems/problem1.json");
       const data = await response.json();
       setOperations(data.operations);
     }
@@ -125,7 +144,6 @@ function Game (){
 
   return (
     <div>
-      <h1 className="title">Bit Breaker</h1>
       <BitDisplay currentBits={bit} />
       <BitOperationButtonContainer>
         {operations.map((operation, index) => (
@@ -137,8 +155,11 @@ function Game (){
 }
 
 export default function Home() {
+  // const [status, setStatus] = useState<Status>("");
   return (
     <div>
+      <h1 className="title">Bit Breaker</h1>
+      <ProblemSelection />
       <Game />
     </div>
   );

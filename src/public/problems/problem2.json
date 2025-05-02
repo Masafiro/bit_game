@@ -1,9 +1,8 @@
 {
     "operations": [
-      { "type": "AND", "parameter": { "value": "10101", "length": 5 } },
       { "type": "OR", "parameter": { "value": "10101", "length": 5 } },
       { "type": "XOR", "parameter": { "value": "10001", "length": 5 } },
       { "type": "NOT" },
-      { "type": "CYCLIC LEFT SHIFT" }
+      { "type": "CYCLIC RIGHT SHIFT" }
     ]
   }
