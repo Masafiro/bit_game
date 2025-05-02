@@ -1,9 +1,11 @@
 {
-    "operations": [
-      { "type": "AND", "parameter": "10101" },
-      { "type": "OR", "parameter": "10101" },
-      { "type": "XOR", "parameter": "10001" },
-      { "type": "NOT" },
-      { "type": "CYCLIC LEFT SHIFT" }
-    ]
-  }
+  "start": "00011",
+  "target": "10101",
+  "operations": [
+    { "type": "AND", "parameter": "10101" },
+    { "type": "OR", "parameter": "10101" },
+    { "type": "XOR", "parameter": "10001" },
+    { "type": "NOT" },
+    { "type": "CYCLIC LEFT SHIFT" }
+  ]
+}

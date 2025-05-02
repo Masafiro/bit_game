@@ -8,6 +8,7 @@ type Bit = string;
 
 
 type BitOperation = 
+  | {type: "SET", parameter: Bit}
   | {type: "AND", parameter: Bit}
   | {type: "OR", parameter: Bit}
   | {type: "XOR", parameter: Bit}
@@ -23,6 +24,9 @@ type Status =
 
 function bitReducer(state: Bit, action: BitOperation): Bit {
   switch (action.type) {
+    case "SET": {
+      return action.parameter;
+    }
     case "AND": {
       const newState = state.split("").map((bit, index) => {
         return (bit === "1" && action.parameter[index] === "1") ? "1" : "0";
@@ -113,9 +117,11 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
 
 function ReturnToProblemSelectionButton({ setStatus } : { setStatus : React.Dispatch<React.SetStateAction<Status>>}){
   return (
-    <button className="returnToProblemSelectionButton" onClick={() => setStatus("ProblemSelectionScreen")}>
-      戻る
-    </button>
+    <div>
+      <button className="returnToProblemSelectionButton" onClick={() => setStatus("ProblemSelectionScreen")}>
+        戻る
+      </button>
+    </div>
   )
 }
 
@@ -123,26 +129,15 @@ function Game({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<St
   const [bit, dispatch] = useReducer(bitReducer, "-----");
   const [operations, setOperations] = useState<BitOperation[]>([]);
 
-  // useEffect(() => {
-  //   const newOperations: BitOperation[] = [
-  //     { type: "AND", parameter: "11101"},
-  //     { type: "OR", parameter:"10101" },
-  //     { type: "XOR", parameter: "10001" },
-  //     { type: "NOT" },
-  //     { type: "CYCLIC LEFT SHIFT" },
-  //   ];
-  //   setOperations(newOperations);
-  // }, []); // 空の依存配列で初回レンダリング時のみ実行
-
   useEffect(() => {
     async function fetchOperations() {
       const response = await fetch("/problems/problem1.json");
       const data = await response.json();
       setOperations(data.operations);
+      dispatch({"type": "SET", "parameter": data.start});
     }
     fetchOperations();
   }, []); 
-  
 
   return (
     <div>
