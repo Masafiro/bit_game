@@ -98,7 +98,7 @@ function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
 
 function ProblemButton({ problem, problemFile, setStatus }: { problem: string, problemFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
   return (
-    <button className="problemButton" onClick={() => setStatus({status_type: "GameScreen", problem_file: {problemFile: {problemFile}}})}>
+    <button className="problemButton" onClick={() => setStatus({status_type: "GameScreen", problem_file: problemFile})}>
       {problem}
     </button>
   );
@@ -132,7 +132,7 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
 
   useEffect(() => {
     async function fetchOperations() {
-      const response = await fetch("/problems/" + problemFile.problemFile.problemFile);
+      const response = await fetch("/problems/" + problemFile);
       const data = await response.json();
       setOperations(data.problem.operations);
       dispatch({"operation_type": "set", "parameter": data.problem.start});
@@ -169,7 +169,7 @@ export default function Home() {
         <div>
           <h1 className="title">Bit Breaker</h1>
           {status.status_type}
-          {status.problem_file.problemFile.problemFile}
+          {status.problem_file}
           <Game setStatus={setStatus} problemFile={status.problem_file}/>
         </div>
       );
