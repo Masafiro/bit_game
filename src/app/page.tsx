@@ -1,7 +1,7 @@
 'use client';
 
 // import React from "react";
-import { useEffect, useState, useReducer } from "react";
+import React, { useEffect, useState, useReducer } from "react";
 
 
 type Bit = string;
@@ -61,11 +61,7 @@ function bitReducer(state: Bit, action: BitOperation): Bit {
   }
 }
 
-
-function BitOperationButton({ dispatch, operation }: { 
-  dispatch: React.Dispatch<BitOperation>; 
-  operation: BitOperation 
-}) {
+function BitOperationButton({ dispatch, operation }: { dispatch: React.Dispatch<BitOperation>; operation: BitOperation }) {
   return (
     <button className="bitOperationButton" onClick={() => dispatch({ ...operation})}>
       {operation.type}
@@ -82,7 +78,6 @@ function BitOperationButtonContainer({ children }: { children: React.ReactNode }
   );
 }
 
-
 function BitDisplay({ currentBits }: { currentBits: Bit }) {
   return (
     <div className="bitDisplay"> {currentBits} </div>
@@ -97,27 +92,34 @@ function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ProblemButton({ problem }: { problem: string }) {
+function ProblemButton({ problem, setStatus }: { problem: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
   return (
-    <button className="problemButton">
+    <button className="problemButton" onClick={() => setStatus("GameScreen")}>
       {problem}
     </button>
   );
 }
 
-function ProblemSelection() {
+function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<Status>>}) {
   return (
     <div>
       <ProblemButtonContainer>
-        <ProblemButton problem="Problem 1" />
-        <ProblemButton problem="Problem 2" />
+        <ProblemButton problem="Problem 1" setStatus={setStatus} />
+        <ProblemButton problem="Problem 2" setStatus={setStatus} />
       </ProblemButtonContainer>
     </div>
   );
 }
 
+function ReturnToProblemSelectionButton({ setStatus } : { setStatus : React.Dispatch<React.SetStateAction<Status>>}){
+  return (
+    <button className="returnToProblemSelectionButton" onClick={() => setStatus("ProblemSelectionScreen")}>
+      戻る
+    </button>
+  )
+}
 
-function Game (){
+function Game({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<Status>>}) {
   const [bit, dispatch] = useReducer(bitReducer, "-----");
   const [operations, setOperations] = useState<BitOperation[]>([]);
 
@@ -150,18 +152,27 @@ function Game (){
           <BitOperationButton key={index} dispatch={dispatch} operation={operation} />
         ))}
       </BitOperationButtonContainer>
+      <ReturnToProblemSelectionButton setStatus={setStatus} />
     </div>
   );
 }
 
 export default function Home() {
-  // const [status, setStatus] = useState<Status>("");
-  return (
-    <div>
-      <h1 className="title">Bit Breaker</h1>
-      <ProblemSelection />
-      <Game />
-    </div>
-  );
+  const [status, setStatus] = useState<Status>("ProblemSelectionScreen");
+  switch (status){
+    case "ProblemSelectionScreen":
+      return (
+        <div>
+          <h1 className="title">Bit Breaker</h1>
+          <ProblemSelection setStatus={setStatus} />
+        </div>
+      );
+    case "GameScreen":
+      return (
+        <div>
+          <h1 className="title">Bit Breaker</h1>
+          <Game setStatus={setStatus}/>
+        </div>
+      );
+  }
 }
-
