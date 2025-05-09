@@ -1,7 +1,7 @@
 'use client';
 
-// import React from "react";
 import React, { useEffect, useState, useReducer } from "react";
+import './globals.css';
 
 type Bit = string;
 type BitHistory = Bit[];
@@ -241,9 +241,11 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
   useEffect(() => {
     async function fetchOperations() {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/problems/${problemFile}`);
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        console.log(`basepath: ${basePath}`); 
+        const response = await fetch(`${basePath}/problems/${problemFile}`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch JSON: ${response.status}`);
+          throw new Error(`Failed to fetch JSON: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
         setProblem(data.problem);
@@ -251,7 +253,11 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
         dispatchBitHistory({ operation_type: "append", parameter: data.problem.start });
       } catch (error) {
         console.error("Error fetching problem file:", error);
-        alert("問題ファイルの読み込みに失敗しました。");
+        if (error instanceof Error) {
+          alert(`問題ファイルの読み込みに失敗しました: ${error.message}`);
+        } else {
+          alert("問題ファイルの読み込みに失敗しました: 不明なエラーが発生しました。");
+        }
       }
     }
     fetchOperations();
