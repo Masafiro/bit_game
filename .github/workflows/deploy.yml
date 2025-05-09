@@ -19,12 +19,18 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd src
+          npm install
 
       - name: Build
-        run: npm run build
+        run: |
+          cd src
+          npm run build
 
       - name: Deploy to GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run deploy
+        run: |
+          cd src
+          npm run deploy
