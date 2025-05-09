@@ -3,9 +3,7 @@
 // import React from "react";
 import React, { useEffect, useState, useReducer } from "react";
 
-
 type Bit = string;
-
 
 type BitOperation = 
   | {operation_type: "set", parameter: Bit}
@@ -15,12 +13,10 @@ type BitOperation =
   | {operation_type: "not"}
   | {operation_type: "cyclic-lshift"}
   | {operation_type: "cyclic-rshift"}
-
   
 type Status =
   | {status_type: "ProblemSelectionScreen"}
   | {status_type: "GameScreen", problem_file: string}
-
 
 function bitReducer(state: Bit, action: BitOperation): Bit {
   switch (action.operation_type) {
@@ -65,9 +61,29 @@ function bitReducer(state: Bit, action: BitOperation): Bit {
   }
 }
 
-function BitOperationButton({ dispatch, operation }: { dispatch: React.Dispatch<BitOperation>; operation: BitOperation }) {
+type MoveCountOperation = 
+  | "Increment"
+  | "Decrement"
+
+function MoveCountReducer(state: number, action: MoveCountOperation): number {
+  switch (action) {
+    case "Increment": {
+      const newState = state + 1;
+      return newState;
+    }
+    case "Decrement": {
+      const newState = state - 1;
+      return newState;
+    }
+  }
+}
+
+function BitOperationButton({ dispatchBit, dispatchMoveCount, operation }: { dispatchBit: React.Dispatch<BitOperation>, dispatchMoveCount: React.Dispatch<MoveCountOperation>, operation: BitOperation }) {
   return (
-    <button className="bitOperationButton" onClick={() => dispatch({ ...operation})}>
+    <button className="bitOperationButton" onClick={() => {
+      dispatchBit({ ...operation});
+      dispatchMoveCount("Increment");
+    }}>
       {operation.operation_type}
       {"parameter" in operation && ` ${operation.parameter}`}
     </button>
@@ -126,16 +142,25 @@ function ReturnToProblemSelectionButton({ setStatus } : { setStatus : React.Disp
   )
 }
 
-function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFile: string}) {
-  const [bit, dispatch] = useReducer(bitReducer, "-----");
-  const [operations, setOperations] = useState<BitOperation[]>([]);
+function MoveCounter({ moveCount } : { moveCount : number }){
+  return (
+    <div>
+      手数: {moveCount}
+    </div>
+  );
+}
 
+function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFile: string}) {
+  const [bit, dispatchBit] = useReducer(bitReducer, "-----");
+  const [operations, setOperations] = useState<BitOperation[]>([]);
+  const [moveCount, dispatchMoveCount] = useReducer(MoveCountReducer, 0);
+  
   useEffect(() => {
     async function fetchOperations() {
       const response = await fetch("/problems/" + problemFile);
       const data = await response.json();
       setOperations(data.problem.operations);
-      dispatch({"operation_type": "set", "parameter": data.problem.start});
+      dispatchBit({"operation_type": "set", "parameter": data.problem.start});
     }
     fetchOperations();
   }, []); 
@@ -143,9 +168,10 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
   return (
     <div>
       <BitDisplay currentBits={bit} />
+      <MoveCounter moveCount={moveCount} />
       <BitOperationButtonContainer>
         {operations.map((operation, index) => (
-          <BitOperationButton key={index} dispatch={dispatch} operation={operation} />
+          <BitOperationButton key={index} dispatchBit={dispatchBit} dispatchMoveCount={dispatchMoveCount} operation={operation} />
         ))}
       </BitOperationButtonContainer>
       <ReturnToProblemSelectionButton setStatus={setStatus} />
