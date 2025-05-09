@@ -22,7 +22,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd src
           npm install
 
       - name: Configure Git
@@ -32,12 +31,10 @@ jobs:
 
       - name: Build
         run: |
-          cd src
           npm run build
 
       - name: Deploy to GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd src
           npx gh-pages -d out --repo https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
