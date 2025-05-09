@@ -4,6 +4,7 @@
 import React, { useEffect, useState, useReducer } from "react";
 
 type Bit = string;
+type BitHistory = Bit[];
 
 type BitOperation = 
   | {operation_type: "set", parameter: Bit}
@@ -13,12 +14,18 @@ type BitOperation =
   | {operation_type: "not"}
   | {operation_type: "cyclic-lshift"}
   | {operation_type: "cyclic-rshift"}
-  
+
+type BitHistoryOperation = 
+  | {operation_type: "append", parameter: Bit}
+  | {operation_type: "bitoperation", bit_operation: BitOperation}
+  | {operation_type: "pop"}
+  | {operation_type: "clear"}
+
 type Status =
   | {status_type: "ProblemSelectionScreen"}
   | {status_type: "GameScreen", problem_file: string}
 
-function bitReducer(state: Bit, action: BitOperation): Bit {
+function OperateBit(state: Bit, action: BitOperation): Bit {
   switch (action.operation_type) {
     case "set": {
       return action.parameter;
@@ -61,6 +68,32 @@ function bitReducer(state: Bit, action: BitOperation): Bit {
   }
 }
 
+function BitHistoryReducer(state: BitHistory, action: BitHistoryOperation): BitHistory {
+  console.log(action);
+  switch (action.operation_type) {
+    case "append": {
+      let newState = structuredClone(state);
+      newState.push(action.parameter);
+      return newState;
+    }
+    case "bitoperation": {
+      let newState = structuredClone(state);
+      let nextBit = OperateBit(newState[newState.length - 1], action.bit_operation)
+      newState.push(nextBit);
+      return newState;
+    }
+    case "pop": {
+      let newState = structuredClone(state);
+      newState.pop();
+      return newState;
+    }
+    case "clear": {
+      let newState: Bit[] = [];
+      return newState;
+    }
+  }
+}
+
 type MoveCountOperation = 
   | "Increment"
   | "Decrement"
@@ -78,11 +111,10 @@ function MoveCountReducer(state: number, action: MoveCountOperation): number {
   }
 }
 
-function BitOperationButton({ dispatchBit, dispatchMoveCount, operation }: { dispatchBit: React.Dispatch<BitOperation>, dispatchMoveCount: React.Dispatch<MoveCountOperation>, operation: BitOperation }) {
+function BitOperationButton({ dispatchBitHistory, operation }: { dispatchBitHistory: React.Dispatch<BitHistoryOperation>, operation: BitOperation }) {
   return (
     <button className="bitOperationButton" onClick={() => {
-      dispatchBit({ ...operation});
-      dispatchMoveCount("Increment");
+      dispatchBitHistory({"operation_type": "bitoperation", bit_operation: operation});
     }}>
       {operation.operation_type}
       {"parameter" in operation && ` ${operation.parameter}`}
@@ -151,27 +183,32 @@ function MoveCounter({ moveCount } : { moveCount : number }){
 }
 
 function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFile: string}) {
-  const [bit, dispatchBit] = useReducer(bitReducer, "-----");
+  const [BitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
   const [operations, setOperations] = useState<BitOperation[]>([]);
-  const [moveCount, dispatchMoveCount] = useReducer(MoveCountReducer, 0);
   
   useEffect(() => {
     async function fetchOperations() {
       const response = await fetch("/problems/" + problemFile);
       const data = await response.json();
       setOperations(data.problem.operations);
-      dispatchBit({"operation_type": "set", "parameter": data.problem.start});
+      dispatchBitHistory({"operation_type": "clear"});
+      dispatchBitHistory({"operation_type": "append", "parameter": data.problem.start});
+      console.log(BitHistory);
+      console.log(BitHistory.length);
     }
     fetchOperations();
   }, []); 
 
   return (
     <div>
-      <BitDisplay currentBits={bit} />
-      <MoveCounter moveCount={moveCount} />
+      <div>
+        BitHistory: {BitHistory.toString()}
+      </div>
+      <BitDisplay currentBits={BitHistory[BitHistory.length - 1]} />
+      <MoveCounter moveCount={BitHistory.length - 1} />
       <BitOperationButtonContainer>
         {operations.map((operation, index) => (
-          <BitOperationButton key={index} dispatchBit={dispatchBit} dispatchMoveCount={dispatchMoveCount} operation={operation} />
+          <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
         ))}
       </BitOperationButtonContainer>
       <ReturnToProblemSelectionButton setStatus={setStatus} />
