@@ -25,10 +25,9 @@
         出力するファイル名は，73,74行目のfilename,filename_offsetをいじることで変更可能
 
 
-    - コンパイル
-        g++ -O2 -Wall -o writer problem_generator_json.cpp
+    - コンパイルと実行
+        g++ -O2 -o writer problem_generator_json.cpp
         ./writer 
-
 
     - 例
     [入力]
@@ -47,7 +46,7 @@
         add // ここで指定した6つの操作は問題には含まれない
         
     [出力] 
-        
+        問題ごとにjsonファイルに出力
 
 
 */
@@ -71,6 +70,7 @@ using json = nlohmann::json;
 // ファイルネームはそれぞれ problem1, problem2, problme3 となる．
 string filename = "problem";
 int filename_offset = 0;
+const int problemnum_limit = 3000;
 
 vector<int> solver(int n, int m, unsigned int start, unsigned int target,
     vector<pair<string,unsigned int>> &operation, set<int> &counted, int turn_limit){
@@ -292,17 +292,28 @@ void to_json(json& j, const dataset& ds){
         }
     };
 }
+json to_json_answer(const dataset& ds){
+    json j;
+    j["minimum_moves"] = ds.turn_min;
+    j["answer"] = ds.optimal_operation;   // std::vector<int> はそのまま配列になる
+    return j;
+}
 
 void output_json(dataset &d, int inc){
     json j = d;
     ofstream(filename + to_string(inc + filename_offset) + ".json")<< setw(2) << j << '\n';  // 整形して書き込み
+    //答えの出力
+    json j_answer = to_json_answer(d);        // {"answer":[1,2,2,1]}
+    std::ofstream("answer_" + filename + to_string(inc + filename_offset) + ".json") << std::setw(2) << j_answer << '\n';
 }
 
 
 int main(){
     // 入力
     cin >> problemnum >> dightnum; 
-
+    if(problemnum_limit < problemnum){
+        throw runtime_error("The number of problem if too large");
+    }
     string start_str;
     cin >> start_str;
     if(start_str != "-1") 
