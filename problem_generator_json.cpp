@@ -70,6 +70,7 @@ using json = nlohmann::json;
 // ファイルネームはそれぞれ problem1, problem2, problme3 となる．
 string filename = "problem";
 int filename_offset = 0;
+// 出力のしすぎを防ぐ
 const int problemnum_limit = 3000;
 
 vector<int> solver(int n, int m, unsigned int start, unsigned int target,
@@ -295,15 +296,14 @@ void to_json(json& j, const dataset& ds){
 json to_json_answer(const dataset& ds){
     json j;
     j["minimum_moves"] = ds.turn_min;
-    j["answer"] = ds.optimal_operation;   // std::vector<int> はそのまま配列になる
+    j["answer"] = ds.optimal_operation; 
     return j;
 }
 
 void output_json(dataset &d, int inc){
     json j = d;
-    ofstream(filename + to_string(inc + filename_offset) + ".json")<< setw(2) << j << '\n';  // 整形して書き込み
-    //答えの出力
-    json j_answer = to_json_answer(d);        // {"answer":[1,2,2,1]}
+    ofstream(filename + to_string(inc + filename_offset) + ".json")<< setw(2) << j << '\n';  
+    json j_answer = to_json_answer(d);     
     std::ofstream("answer_" + filename + to_string(inc + filename_offset) + ".json") << std::setw(2) << j_answer << '\n';
 }
 
