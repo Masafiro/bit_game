@@ -210,10 +210,25 @@ function MoveCounter({ moveCount } : { moveCount : number }){
   );
 }
 
+function Timer(){
+    const [count, setCount] = useState<number>(0);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCount(count + 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [count]);
+  return (
+    <div>
+      タイム: {count}秒
+    </div>
+  )
+}
+
 function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFile: string}) {
   const [BitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
   const [operations, setOperations] = useState<BitOperation[]>([]);
-  
+
   useEffect(() => {
     async function fetchOperations() {
       const response = await fetch("/problems/" + problemFile);
@@ -234,6 +249,7 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
       </div>
       <BitDisplay currentBits={BitHistory[BitHistory.length - 1]} />
       <MoveCounter moveCount={BitHistory.length - 1} />
+      <Timer />
       <BitOperationButtonContainer>
         {operations.map((operation, index) => (
           <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
