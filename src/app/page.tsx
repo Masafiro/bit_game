@@ -6,16 +6,17 @@ import React, { useEffect, useState, useReducer } from "react";
 type Bit = string;
 type BitHistory = Bit[];
 
-type BitOperation = 
+type BitOperation =
   | {operation_type: "set", parameter: Bit}
   | {operation_type: "and", parameter: Bit}
   | {operation_type: "or", parameter: Bit}
-  | {operation_type: "xor", parameter: Bit}
+  | { operation_type: "xor", parameter: Bit }
+  | {operation_type: "xnor", parameter: Bit}
   | {operation_type: "not"}
   | {operation_type: "cyclic-lshift"}
   | {operation_type: "cyclic-rshift"}
 
-type BitHistoryOperation = 
+type BitHistoryOperation =
   | {operation_type: "append", parameter: Bit}
   | {operation_type: "bitoperation", bit_operation: BitOperation}
   | {operation_type: "pop"}
@@ -47,6 +48,12 @@ function OperateBit(state: Bit, action: BitOperation): Bit {
         return (bit === "1" && action.parameter[index] === "0") || (bit === "0" && action.parameter[index] === "1") ? "1" : "0";
       }
       ).join("");
+      return newState;
+    }
+    case "xnor": {
+      const newState = state.split("").map((bit, index) => {
+        return (bit === action.parameter[index]) ? "1" : "0";
+      }).join("");
       return newState;
     }
     case "not": {
@@ -94,7 +101,7 @@ function BitHistoryReducer(state: BitHistory, action: BitHistoryOperation): BitH
   }
 }
 
-type MoveCountOperation = 
+type MoveCountOperation =
   | "Increment"
   | "Decrement"
 
@@ -240,7 +247,7 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
       console.log(BitHistory.length);
     }
     fetchOperations();
-  }, []); 
+  }, []);
 
   return (
     <div>
