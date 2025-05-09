@@ -16,6 +16,8 @@ type BitOperation =
   | {operation_type: "cyclic-lshift"}
   | {operation_type: "cyclic-rshift"}
 
+type Problem = {bit_length: number, start: Bit, target: Bit, operation_count: number, operations: BitOperation[], minimum_moves: number}
+
 type BitHistoryOperation =
   | {operation_type: "append", parameter: Bit}
   | {operation_type: "bitoperation", bit_operation: BitOperation}
@@ -76,7 +78,6 @@ function OperateBit(state: Bit, action: BitOperation): Bit {
 }
 
 function BitHistoryReducer(state: BitHistory, action: BitHistoryOperation): BitHistory {
-  console.log(action);
   switch (action.operation_type) {
     case "append": {
       let newState = structuredClone(state);
@@ -217,9 +218,13 @@ function MoveCounter({ moveCount } : { moveCount : number }){
   );
 }
 
-function Timer(){
-    const [count, setCount] = useState<number>(0);
+function Timer({ bitHistory, problem }: { bitHistory: BitHistory, problem: Problem}){
+  const [count, setCount] = useState<number>(0);
   useEffect(() => {
+    console.log(problem);
+      if (bitHistory[bitHistory.length - 1] === problem.target){
+        return;
+      }
     const timer = setTimeout(() => {
       setCount(count + 1);
     }, 1000);
@@ -231,23 +236,22 @@ function Timer(){
     </div>
   )
 }
-
 function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFile: string}) {
   const [BitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
-  const [operations, setOperations] = useState<BitOperation[]>([]);
+  const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
 
   useEffect(() => {
     async function fetchOperations() {
       const response = await fetch("/problems/" + problemFile);
       const data = await response.json();
-      setOperations(data.problem.operations);
+      setProblem(data.problem);
       dispatchBitHistory({"operation_type": "clear"});
       dispatchBitHistory({"operation_type": "append", "parameter": data.problem.start});
-      console.log(BitHistory);
-      console.log(BitHistory.length);
     }
     fetchOperations();
   }, []);
+
+  console.log(problem);
 
   return (
     <div>
@@ -256,9 +260,9 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
       </div>
       <BitDisplay currentBits={BitHistory[BitHistory.length - 1]} />
       <MoveCounter moveCount={BitHistory.length - 1} />
-      <Timer />
+      <Timer bitHistory={BitHistory} problem={problem} />
       <BitOperationButtonContainer>
-        {operations.map((operation, index) => (
+        {problem.operations.map((operation, index) => (
           <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
         ))}
       </BitOperationButtonContainer>
