@@ -10,7 +10,7 @@ type BitOperation =
   | {operation_type: "set", parameter: Bit}
   | {operation_type: "and", parameter: Bit}
   | {operation_type: "or", parameter: Bit}
-  | { operation_type: "xor", parameter: Bit }
+  | {operation_type: "xor", parameter: Bit }
   | {operation_type: "xnor", parameter: Bit}
   | {operation_type: "not"}
   | {operation_type: "cyclic-lshift"}
@@ -202,11 +202,9 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
 
 function ReturnToProblemSelectionButton({ setStatus } : { setStatus : React.Dispatch<React.SetStateAction<Status>>}){
   return (
-    <div>
-      <button className="returnToProblemSelectionButton" onClick={() => setStatus({status_type: "ProblemSelectionScreen"})}>
-        戻る
-      </button>
-    </div>
+    <button className="returnToProblemSelectionButton" onClick={() => setStatus({status_type: "ProblemSelectionScreen"})}>
+      戻る
+    </button>
   )
 }
 
@@ -256,7 +254,7 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
   return (
     <div>
       <div>
-        BitHistory: {BitHistory.toString()}
+        Target: {problem.target}
       </div>
       <BitDisplay currentBits={BitHistory[BitHistory.length - 1]} />
       <MoveCounter moveCount={BitHistory.length - 1} />
@@ -268,7 +266,12 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
       </BitOperationButtonContainer>
       <UndoButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
       <RetryButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
-      <ReturnToProblemSelectionButton setStatus={setStatus} />
+      <div>
+        <ReturnToProblemSelectionButton setStatus={setStatus} />
+      </div>
+      <div>
+        BitHistory: {BitHistory.toString()}
+      </div>
     </div>
   );
 }
