@@ -153,29 +153,49 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
   );
 }
 
+function Title(){
+  return (
+    <div>
+      <h1 className="title">Bit Breaker</h1>
+    </div>
+  );
+}
+
+function DebugInfo({ status } : {status: Status }){
+  switch (status.status_type){
+    case "ProblemSelectionScreen":
+      return (
+        <div>
+          status_type: {status.status_type}
+        </div>
+      );
+    case "GameScreen":
+      return (
+        <div>
+          status_type: {status.status_type}
+          <br/>
+          problem_file: {status.problem_file}
+        </div>
+      );
+  }
+}
+
 export default function Home() {
   const [status, setStatus] = useState<Status>({status_type: "ProblemSelectionScreen"});
   switch (status.status_type){
     case "ProblemSelectionScreen":
       return (
         <div>
-          <h1 className="title">Bit Breaker</h1>
-          <div>
-            status_type: {status.status_type}
-          </div>
+          <Title />
+          <DebugInfo status={status} />
           <ProblemSelection setStatus={setStatus} />
         </div>
       );
     case "GameScreen":
       return (
         <div>
-          <h1 className="title">Bit Breaker</h1>
-          <div>
-            status_type: {status.status_type}
-          </div>
-          <div>
-            problem_file: {status.problem_file}
-          </div>
+          <Title />
+          <DebugInfo status={status} />
           <Game setStatus={setStatus} problemFile={status.problem_file}/>
         </div>
       );
