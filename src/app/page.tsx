@@ -240,14 +240,22 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
 
   useEffect(() => {
     async function fetchOperations() {
-      const response = await fetch("/problems/" + problemFile);
-      const data = await response.json();
-      setProblem(data.problem);
-      dispatchBitHistory({"operation_type": "clear"});
-      dispatchBitHistory({"operation_type": "append", "parameter": data.problem.start});
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/problems/${problemFile}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch JSON: ${response.status}`);
+        }
+        const data = await response.json();
+        setProblem(data.problem);
+        dispatchBitHistory({ operation_type: "clear" });
+        dispatchBitHistory({ operation_type: "append", parameter: data.problem.start });
+      } catch (error) {
+        console.error("Error fetching problem file:", error);
+        alert("問題ファイルの読み込みに失敗しました。");
+      }
     }
     fetchOperations();
-  }, []);
+  }, [problemFile]);
 
   console.log(problem);
 
