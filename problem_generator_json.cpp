@@ -22,8 +22,14 @@
         - 問題に入れない操作の種類数と各操作 (第2変数kは不要)
 
     - 出力 (問題ごとに別のjsonファイルに出力する)
-        出力するファイル名は，73,74行目のfilename,filename_offsetをいじることで変更可能
+        - 問題を持つjsonファイルとその問題に対する解答を持つjsonファイルを生成する
+        ex) 問題を2つ生成する時に得られるファイル
+            answer_problem1.json
+            answer_problem2.json
+            problem1.json
+            problem2.json
 
+        - ファイル名は，73,74行目のfilename,filename_offsetをいじることで変更可能
 
     - コンパイルと実行
         g++ -O2 -o writer problem_generator_json.cpp
