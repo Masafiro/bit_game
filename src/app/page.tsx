@@ -145,11 +145,23 @@ function UndoButton({ bitHistory, dispatchBitHistory } : { bitHistory: BitHistor
     );
   } else {
     return (
-      <button className="undoButtonEnabled" onClick={() => dispatchBitHistory({"operation_type": "pop"})}>
+      <button className="undoButtonEnabled" onClick={() => dispatchBitHistory({operation_type: "pop"})}>
         1 手戻る
       </button>
     );
   }
+}
+
+function RetryButton({ bitHistory, dispatchBitHistory } : { bitHistory: BitHistory, dispatchBitHistory: React.Dispatch<BitHistoryOperation> }){
+  return (
+    <button className="retryButton" onClick={() => {
+      let initialBit = bitHistory[0];
+      dispatchBitHistory({operation_type: "clear"});
+      dispatchBitHistory({operation_type: "append", parameter: initialBit});
+    }}>
+      リトライ
+    </button>
+  )
 }
 
 function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
@@ -228,6 +240,7 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
         ))}
       </BitOperationButtonContainer>
       <UndoButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
+      <RetryButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
       <ReturnToProblemSelectionButton setStatus={setStatus} />
     </div>
   );
