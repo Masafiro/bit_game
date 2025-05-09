@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 const SUB_DIRECTORY = "/bit_game";
 
 /* 本番環境と開発環境の分岐用のフラグ */
-const isProd = process.env.NODE_ENV == "production"
+const isProd = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
   output: "export",
