@@ -114,12 +114,12 @@ function MoveCountReducer(state: number, action: MoveCountOperation): number {
 function BitOperationButton({ dispatchBitHistory, operation }: { dispatchBitHistory: React.Dispatch<BitHistoryOperation>, operation: BitOperation }) {
   return (
     <button className="bitOperationButton" onClick={() => {
-      dispatchBitHistory({"operation_type": "bitoperation", bit_operation: operation});
+      dispatchBitHistory({operation_type: "bitoperation", bit_operation: operation});
     }}>
       {operation.operation_type}
       {"parameter" in operation && ` ${operation.parameter}`}
     </button>
-  )
+  );
 }
 
 function BitOperationButtonContainer({ children }: { children: React.ReactNode }) {
@@ -134,6 +134,22 @@ function BitDisplay({ currentBits }: { currentBits: Bit }) {
   return (
     <div className="bitDisplay"> {currentBits} </div>
   )
+}
+
+function UndoButton({ bitHistory, dispatchBitHistory } : { bitHistory: BitHistory, dispatchBitHistory: React.Dispatch<BitHistoryOperation> }){
+  if (bitHistory.length === 1){
+    return (
+      <button className="undoButtonDisabled">
+        1 手戻る
+      </button>
+    );
+  } else {
+    return (
+      <button className="undoButtonEnabled" onClick={() => dispatchBitHistory({"operation_type": "pop"})}>
+        1 手戻る
+      </button>
+    );
+  }
 }
 
 function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
@@ -211,6 +227,7 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
           <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
         ))}
       </BitOperationButtonContainer>
+      <UndoButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
       <ReturnToProblemSelectionButton setStatus={setStatus} />
     </div>
   );
