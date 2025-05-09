@@ -226,13 +226,13 @@ function Timer({ bitHistory, problem }: { bitHistory: BitHistory, problem: Probl
         return;
       }
     const timer = setTimeout(() => {
-      setCount(count + 1);
-    }, 1000);
+      setCount(count + 100);
+    }, 100);
     return () => clearTimeout(timer);
   }, [count]);
   return (
     <div>
-      タイム: {count}秒
+      タイム: {count / 1000}秒
     </div>
   )
 }
@@ -307,16 +307,16 @@ export default function Home() {
       return (
         <div>
           <Title />
-          <DebugInfo status={status} />
           <ProblemSelection setStatus={setStatus} />
+          <DebugInfo status={status} />
         </div>
       );
     case "GameScreen":
       return (
         <div>
           <Title />
-          <DebugInfo status={status} />
           <Game setStatus={setStatus} problemFile={status.problem_file}/>
+          <DebugInfo status={status} />
         </div>
       );
   }
