@@ -26,7 +26,8 @@ type BitHistoryOperation =
 
 type Status =
   | {status_type: "ProblemSelectionScreen"}
-  | {status_type: "GameScreen", problem_file: string}
+  | {status_type: "ProblemModeGameScreen", problem_file: string}
+  | {status_type: "TimeAttackModeGameScreen", time_attack_file: string}
 
 function OperateBit(state: Bit, action: BitOperation): Bit {
   switch (action.operation_type) {
@@ -180,10 +181,18 @@ function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ProblemButton({ problem, problemFile, setStatus }: { problem: string, problemFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
+function ProblemButton({ problemName, problemFile, setStatus }: { problemName: string, problemFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
   return (
-    <button className="problemButton" onClick={() => setStatus({status_type: "GameScreen", problem_file: problemFile})}>
-      {problem}
+    <button className="problemButton" onClick={() => setStatus({status_type: "ProblemModeGameScreen", problem_file: problemFile})}>
+      {problemName}
+    </button>
+  );
+}
+
+function TimeAttackButton({timeAttackFile, setStatus }: { timeAttackFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
+  return (
+    <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
+      タイムアタック
     </button>
   );
 }
@@ -192,10 +201,11 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
   return (
     <div>
       <ProblemButtonContainer>
-        <ProblemButton problem="Problem 1" problemFile="problem1.json" setStatus={setStatus} />
-        <ProblemButton problem="Problem 2" problemFile="problem2.json" setStatus={setStatus} />
-        <ProblemButton problem="Problem 3" problemFile="problem3.json" setStatus={setStatus} />
+        <ProblemButton problemName="Problem 1" problemFile="problem1.json" setStatus={setStatus} />
+        <ProblemButton problemName="Problem 2" problemFile="problem2.json" setStatus={setStatus} />
+        <ProblemButton problemName="Problem 3" problemFile="problem3.json" setStatus={setStatus} />
       </ProblemButtonContainer>
+      <TimeAttackButton timeAttackFile="time_attack1.json" setStatus={setStatus} />
     </div>
   );
 }
@@ -234,16 +244,16 @@ function Timer({ bitHistory, problem }: { bitHistory: BitHistory, problem: Probl
     </div>
   )
 }
-function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFile: string}) {
-  const [BitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
+function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFileName: string}) {
+  const [bitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
   const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
 
   useEffect(() => {
-    async function fetchOperations() {
+    async function fetchProblem() {
       try {
         const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
         console.log(`basepath: ${basePath}`); 
-        const response = await fetch(`${basePath}/problems/${problemFile}`);
+        const response = await fetch(`${basePath}/problems/${problemFileName}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch JSON: ${response.status} ${response.statusText}`);
         }
@@ -260,8 +270,8 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
         }
       }
     }
-    fetchOperations();
-  }, [problemFile]);
+    fetchProblem();
+  }, [problemFileName]);
 
   console.log(problem);
 
@@ -270,26 +280,103 @@ function Game({ setStatus, problemFile }: { setStatus: React.Dispatch<React.SetS
       <div>
         Target: {problem.target}
       </div>
-      <BitDisplay currentBits={BitHistory[BitHistory.length - 1]} />
-      <MoveCounter moveCount={BitHistory.length - 1} />
-      <Timer bitHistory={BitHistory} problem={problem} />
+      <BitDisplay currentBits={bitHistory[bitHistory.length - 1]} />
+      <MoveCounter moveCount={bitHistory.length - 1} />
+      <Timer bitHistory={bitHistory} problem={problem} />
       <BitOperationButtonContainer>
         {problem.operations.map((operation, index) => (
           <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
         ))}
       </BitOperationButtonContainer>
-      <UndoButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
-      <RetryButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
+      <UndoButton bitHistory={bitHistory} dispatchBitHistory={dispatchBitHistory} />
+      <RetryButton bitHistory={bitHistory} dispatchBitHistory={dispatchBitHistory} />
       <div>
         <ReturnToProblemSelectionButton setStatus={setStatus} />
       </div>
       <div>
-        BitHistory: {BitHistory.toString()}
+        BitHistory: {bitHistory.toString()}
       </div>
     </div>
   );
 }
 
+type TimeAttack = {problems: string[], problem_count: number}
+
+function TimeAttackModeGame({ setStatus, timeAttackFileName }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, timeAttackFileName: string}) {
+  const [timeAttackFile, setTimeAttackFile] = useState<TimeAttack>({problems: [], problem_count: 0});
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [solvedProblemCount, setSolvedProblemCount] = useState<number>(0);
+  useEffect(() => {
+    async function fetchProblems() {
+      const response = await fetch("/time_attack_data/" + timeAttackFileName);
+      const data = await response.json();
+      setTimeAttackFile(data);
+      let problems = Array(data.problem_count);
+      for (let i = 0; i < data.problem_count; i++){
+        const problemIndex = Math.floor(Math.random() * data.problems.length);
+        const responseProblem = await fetch("/problems/" + data.problems[problemIndex]);
+        const dataProblem = await responseProblem.json();
+        problems[i] = dataProblem.problem;
+      }
+      setProblems(problems);
+      console.log(problems);
+    }
+    fetchProblems();
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(timeAttackFile);
+  //   fetchProblem();
+  // }, []);
+  
+  // const [BitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
+  // const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
+
+  // useEffect(() => {
+  //   async function fetchProblem() {
+  //     const response = await fetch("/problems/" + problemFile);
+  //     const data = await response.json();
+  //     setProblem(data.problem);
+  //     dispatchBitHistory({"operation_type": "clear"});
+  //     dispatchBitHistory({"operation_type": "append", "parameter": data.problem.start});
+  //   }
+  //   fetchProblem();
+  // }, []);
+
+  // console.log(problem);
+  return (
+    <div>
+      問題数: {solvedProblemCount}
+      <div>
+        <ReturnToProblemSelectionButton setStatus={setStatus} />
+      </div>
+    </div>
+  )
+
+  // return (
+  //   <div>
+  //     <div>
+  //       Target: {problem.target}
+  //     </div>
+  //     <BitDisplay currentBits={BitHistory[BitHistory.length - 1]} />
+  //     <MoveCounter moveCount={BitHistory.length - 1} />
+  //     <Timer bitHistory={BitHistory} problem={problem} />
+  //     <BitOperationButtonContainer>
+  //       {problem.operations.map((operation, index) => (
+  //         <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
+  //       ))}
+  //     </BitOperationButtonContainer>
+  //     <UndoButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
+  //     <RetryButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
+  //     <div>
+  //       <ReturnToProblemSelectionButton setStatus={setStatus} />
+  //     </div>
+  //     <div>
+  //       BitHistory: {BitHistory.toString()}
+  //     </div>
+  //   </div>
+  // );
+}
 function Title(){
   return (
     <div>
@@ -306,12 +393,20 @@ function DebugInfo({ status } : {status: Status }){
           status_type: {status.status_type}
         </div>
       );
-    case "GameScreen":
+    case "ProblemModeGameScreen":
       return (
         <div>
           status_type: {status.status_type}
           <br/>
           problem_file: {status.problem_file}
+        </div>
+      );
+    case "TimeAttackModeGameScreen":
+      return (
+        <div>
+          status_type: {status.status_type}
+          <br/>
+          time_attack_file: {status.time_attack_file}
         </div>
       );
   }
@@ -328,11 +423,19 @@ export default function Home() {
           <DebugInfo status={status} />
         </div>
       );
-    case "GameScreen":
+    case "ProblemModeGameScreen":
       return (
         <div>
           <Title />
-          <Game setStatus={setStatus} problemFile={status.problem_file}/>
+          <ProblemModeGame setStatus={setStatus} problemFileName={status.problem_file}/>
+          <DebugInfo status={status} />
+        </div>
+      );
+    case "TimeAttackModeGameScreen":
+      return (
+        <div>
+          <Title />
+          <TimeAttackModeGame setStatus={setStatus} timeAttackFileName={status.time_attack_file}/>
           <DebugInfo status={status} />
         </div>
       );
