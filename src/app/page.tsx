@@ -184,18 +184,26 @@ function ProblemButton({ problemName, problemFile, setStatus }: { problemName: s
   }
 }
 
-function TimeAttackButton({ timeAttackFile, setStatus }: { timeAttackFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
+function TimeAttackButtonContainer({children}: {children: React.ReactNode }) {
+  return (
+    <div className="timeAttackButtonContainer">
+      {children}
+    </div>
+  )
+}
+
+function TimeAttackButton({ timeAttackName, timeAttackFile, setStatus }: { timeAttackName: string, timeAttackFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
   const bestTime = localStorage.getItem(timeAttackFile);
   if (bestTime === null){
     return (
       <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
-      タイムアタック
+        {timeAttackName}
       </button>
     );
   } else {
     return (
       <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
-      タイムアタック (ベストタイム: {Number(bestTime) / 1000} 秒)
+        {timeAttackName} (ベストタイム: {Number(bestTime) / 1000} 秒)
       </button>
     );
   }
@@ -215,8 +223,7 @@ function TimeAttackModeButton({setStatus}: {setStatus: React.Dispatch<React.SetS
         </button>
     );
 }
-function ModeSelection({setStatus}: {setStatus: React.Dispatch<React.SetStateAction<Status>>; })
-{
+function ModeSelection({setStatus}: {setStatus: React.Dispatch<React.SetStateAction<Status>>; }){
     return (
         <div
             style={{
