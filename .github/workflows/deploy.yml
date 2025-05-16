@@ -33,12 +33,12 @@ jobs:
         run: |
           npm run build
 
-      - name: Restructure out directory
-        run: |
-          mkdir -p out/bit_game
-          mv out/_next out/bit_game/_next
-          mv out/favicon.ico out/bit_game/favicon.ico
-          mv out/index.html out/bit_game/index.html
+      # - name: Restructure out directory
+      #   run: |
+      #     mkdir -p out/bit_game
+      #     mv out/_next out/bit_game/_next
+      #     mv out/favicon.ico out/bit_game/favicon.ico
+      #     mv out/index.html out/bit_game/index.html
 
       - name: Deploy to GitHub Pages
         env:
