@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState, useReducer } from "react";
 import './globals.css';
+import { time } from "console";
+import next from "next";
 
 type Bit = string;
-type BitHistory = Bit[];
+type bitHistory = Bit[];
 
 type BitOperation =
   | {operation_type: "set", parameter: Bit}
@@ -18,7 +20,7 @@ type BitOperation =
 
 type Problem = {bit_length: number, start: Bit, target: Bit, operation_count: number, operations: BitOperation[], minimum_moves: number}
 
-type BitHistoryOperation =
+type bitHistoryOperation =
   | {operation_type: "append", parameter: Bit}
   | {operation_type: "bitoperation", bit_operation: BitOperation}
   | {operation_type: "pop"}
@@ -78,7 +80,7 @@ function OperateBit(state: Bit, action: BitOperation): Bit {
   }
 }
 
-function BitHistoryReducer(state: BitHistory, action: BitHistoryOperation): BitHistory {
+function bitHistoryReducer(state: bitHistory, action: bitHistoryOperation): bitHistory {
   switch (action.operation_type) {
     case "append": {
       let newState = structuredClone(state);
@@ -103,27 +105,10 @@ function BitHistoryReducer(state: BitHistory, action: BitHistoryOperation): BitH
   }
 }
 
-type MoveCountOperation =
-  | "Increment"
-  | "Decrement"
-
-function MoveCountReducer(state: number, action: MoveCountOperation): number {
-  switch (action) {
-    case "Increment": {
-      const newState = state + 1;
-      return newState;
-    }
-    case "Decrement": {
-      const newState = state - 1;
-      return newState;
-    }
-  }
-}
-
-function BitOperationButton({ dispatchBitHistory, operation }: { dispatchBitHistory: React.Dispatch<BitHistoryOperation>, operation: BitOperation }) {
+function BitOperationButton({ dispatchbitHistory, operation }: { dispatchbitHistory: React.Dispatch<bitHistoryOperation>, operation: BitOperation }) {
   return (
     <button className="bitOperationButton" onClick={() => {
-      dispatchBitHistory({operation_type: "bitoperation", bit_operation: operation});
+      dispatchbitHistory({operation_type: "bitoperation", bit_operation: operation});
     }}>
       {operation.operation_type}
       {"parameter" in operation && ` ${operation.parameter}`}
@@ -145,7 +130,7 @@ function BitDisplay({ currentBits }: { currentBits: Bit }) {
   )
 }
 
-function UndoButton({ bitHistory, dispatchBitHistory } : { bitHistory: BitHistory, dispatchBitHistory: React.Dispatch<BitHistoryOperation> }){
+function UndoButton({ bitHistory, dispatchbitHistory } : { bitHistory: bitHistory, dispatchbitHistory: React.Dispatch<bitHistoryOperation> }){
   if (bitHistory.length === 1){
     return (
       <button className="undoButtonDisabled">
@@ -154,19 +139,19 @@ function UndoButton({ bitHistory, dispatchBitHistory } : { bitHistory: BitHistor
     );
   } else {
     return (
-      <button className="undoButtonEnabled" onClick={() => dispatchBitHistory({operation_type: "pop"})}>
+      <button className="undoButtonEnabled" onClick={() => dispatchbitHistory({operation_type: "pop"})}>
         1 手戻る
       </button>
     );
   }
 }
 
-function RetryButton({ bitHistory, dispatchBitHistory } : { bitHistory: BitHistory, dispatchBitHistory: React.Dispatch<BitHistoryOperation> }){
+function RetryButton({ bitHistory, dispatchbitHistory } : { bitHistory: bitHistory, dispatchbitHistory: React.Dispatch<bitHistoryOperation> }){
   return (
     <button className="retryButton" onClick={() => {
       let initialBit = bitHistory[0];
-      dispatchBitHistory({operation_type: "clear"});
-      dispatchBitHistory({operation_type: "append", parameter: initialBit});
+      dispatchbitHistory({operation_type: "clear"});
+      dispatchbitHistory({operation_type: "append", parameter: initialBit});
     }}>
       リトライ
     </button>
@@ -226,17 +211,15 @@ function MoveCounter({ moveCount } : { moveCount : number }){
   );
 }
 
-function Timer({ bitHistory, problem }: { bitHistory: BitHistory, problem: Problem}){
+function Timer({ isActive }: { isActive : boolean }){
   const [count, setCount] = useState<number>(0);
   useEffect(() => {
-    console.log(problem);
-      if (bitHistory[bitHistory.length - 1] === problem.target){
-        return;
-      }
-    const timer = setTimeout(() => {
-      setCount(count + 100);
-    }, 100);
-    return () => clearTimeout(timer);
+    if (isActive){
+      const timer = setTimeout(() => {
+        setCount(count + 100);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
   }, [count]);
   return (
     <div>
@@ -245,7 +228,7 @@ function Timer({ bitHistory, problem }: { bitHistory: BitHistory, problem: Probl
   )
 }
 function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFileName: string}) {
-  const [bitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
+  const [bitHistory, dispatchbitHistory] = useReducer(bitHistoryReducer, []);
   const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
 
   useEffect(() => {
@@ -259,8 +242,8 @@ function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Disp
         }
         const data = await response.json();
         setProblem(data.problem);
-        dispatchBitHistory({ operation_type: "clear" });
-        dispatchBitHistory({ operation_type: "append", parameter: data.problem.start });
+        dispatchbitHistory({ operation_type: "clear" });
+        dispatchbitHistory({ operation_type: "append", parameter: data.problem.start });
       } catch (error) {
         console.error("Error fetching problem file:", error);
         if (error instanceof Error) {
@@ -271,9 +254,7 @@ function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Disp
       }
     }
     fetchProblem();
-  }, [problemFileName]);
-
-  console.log(problem);
+  }, []);
 
   return (
     <div>
@@ -282,19 +263,19 @@ function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Disp
       </div>
       <BitDisplay currentBits={bitHistory[bitHistory.length - 1]} />
       <MoveCounter moveCount={bitHistory.length - 1} />
-      <Timer bitHistory={bitHistory} problem={problem} />
+      <Timer isActive={bitHistory[bitHistory.length - 1] !== problem.target} />
       <BitOperationButtonContainer>
         {problem.operations.map((operation, index) => (
-          <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
+          <BitOperationButton key={index} dispatchbitHistory={dispatchbitHistory} operation={operation} />
         ))}
       </BitOperationButtonContainer>
-      <UndoButton bitHistory={bitHistory} dispatchBitHistory={dispatchBitHistory} />
-      <RetryButton bitHistory={bitHistory} dispatchBitHistory={dispatchBitHistory} />
+      <UndoButton bitHistory={bitHistory} dispatchbitHistory={dispatchbitHistory} />
+      <RetryButton bitHistory={bitHistory} dispatchbitHistory={dispatchbitHistory} />
       <div>
         <ReturnToProblemSelectionButton setStatus={setStatus} />
       </div>
       <div>
-        BitHistory: {bitHistory.toString()}
+        bitHistory: {bitHistory.toString()}
       </div>
     </div>
   );
@@ -303,79 +284,103 @@ function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Disp
 type TimeAttack = {problems: string[], problem_count: number}
 
 function TimeAttackModeGame({ setStatus, timeAttackFileName }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, timeAttackFileName: string}) {
-  const [timeAttackFile, setTimeAttackFile] = useState<TimeAttack>({problems: [], problem_count: 0});
-  const [problems, setProblems] = useState<Problem[]>([]);
+  const [timeAttack, setTimeAttack] = useState<TimeAttack>({problems: [], problem_count: 0});
   const [solvedProblemCount, setSolvedProblemCount] = useState<number>(0);
+  const [currentProblem, setcurrentProblem] = useState<number>(0);
+  const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
+  const [bitHistory, dispatchbitHistory] = useReducer(bitHistoryReducer, []);
+
   useEffect(() => {
-    async function fetchProblems() {
-      const response = await fetch("/time_attack_data/" + timeAttackFileName);
-      const data = await response.json();
-      setTimeAttackFile(data);
-      let problems = Array(data.problem_count);
-      for (let i = 0; i < data.problem_count; i++){
-        const problemIndex = Math.floor(Math.random() * data.problems.length);
-        const responseProblem = await fetch("/problems/" + data.problems[problemIndex]);
-        const dataProblem = await responseProblem.json();
-        problems[i] = dataProblem.problem;
+    async function fetchTimeAttack() {
+      try {
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        console.log(`basepath: ${basePath}`); 
+        const response = await fetch(`${basePath}/time_attack_data/${timeAttackFileName}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch JSON: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        setTimeAttack(data);
+        setcurrentProblem(1);
+      } catch (error) {
+        console.error("Error fetching problem file:", error);
+        if (error instanceof Error) {
+          alert(`問題ファイルの読み込みに失敗しました: ${error.message}`);
+        } else {
+          alert("問題ファイルの読み込みに失敗しました: 不明なエラーが発生しました。");
+        }
       }
-      setProblems(problems);
-      console.log(problems);
     }
-    fetchProblems();
+    fetchTimeAttack();
   }, []);
-
-  // useEffect(() => {
-  //   console.log(timeAttackFile);
-  //   fetchProblem();
-  // }, []);
   
-  // const [BitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
-  // const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
+  useEffect(() => {
+    if (currentProblem === 0){
+      return;
+    }
+    async function fetchProblem() {
+      const problemIndex = Math.floor(Math.random() * timeAttack.problems.length);
+      try {
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const response = await fetch(`${basePath}/problems/${timeAttack.problems[problemIndex]}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch JSON: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        setProblem(data.problem);
+        dispatchbitHistory({ operation_type: "clear" });
+        dispatchbitHistory({ operation_type: "append", parameter: data.problem.start });
+      } catch (error) {
+        console.error("Error fetching problem file:", error);
+        if (error instanceof Error) {
+          alert(`問題ファイルの読み込みに失敗しました: ${error.message}`);
+        } else {
+          alert("問題ファイルの読み込みに失敗しました: 不明なエラーが発生しました。");
+        }
+      }
+    };
+    fetchProblem();
+  }, [currentProblem]);
 
-  // useEffect(() => {
-  //   async function fetchProblem() {
-  //     const response = await fetch("/problems/" + problemFile);
-  //     const data = await response.json();
-  //     setProblem(data.problem);
-  //     dispatchBitHistory({"operation_type": "clear"});
-  //     dispatchBitHistory({"operation_type": "append", "parameter": data.problem.start});
-  //   }
-  //   fetchProblem();
-  // }, []);
+  useEffect(() => {
+    if (bitHistory.length > 0 && bitHistory[bitHistory.length - 1] === problem.target){
+      const nextSolvedProblemCount = solvedProblemCount + 1;
+      setSolvedProblemCount(nextSolvedProblemCount);
+      if (nextSolvedProblemCount < timeAttack.problem_count){
+        setTimeout(() => {
+          setcurrentProblem(nextSolvedProblemCount + 1);
+        }, 1000);
+      }
+    }
+  }, [bitHistory]);
 
-  // console.log(problem);
   return (
     <div>
-      問題数: {solvedProblemCount}
+      解いた問題数: {solvedProblemCount}
+      <br/>
+      問題数: {timeAttack.problem_count}
+      <br/>
+      <div>
+        Target: {problem.target}
+      </div>
+      <BitDisplay currentBits={bitHistory[bitHistory.length - 1]} />
+      <MoveCounter moveCount={bitHistory.length - 1} />
+      <Timer isActive={timeAttack.problem_count == 0 || solvedProblemCount < timeAttack.problem_count} />
+      <BitOperationButtonContainer>
+        {problem.operations.map((operation, index) => (
+          <BitOperationButton key={index} dispatchbitHistory={dispatchbitHistory} operation={operation} />
+        ))}
+      </BitOperationButtonContainer>
+      <UndoButton bitHistory={bitHistory} dispatchbitHistory={dispatchbitHistory} />
+      <RetryButton bitHistory={bitHistory} dispatchbitHistory={dispatchbitHistory} />
       <div>
         <ReturnToProblemSelectionButton setStatus={setStatus} />
       </div>
+      <div>
+        bitHistory: {bitHistory.toString()}
+      </div> 
     </div>
   )
-
-  // return (
-  //   <div>
-  //     <div>
-  //       Target: {problem.target}
-  //     </div>
-  //     <BitDisplay currentBits={BitHistory[BitHistory.length - 1]} />
-  //     <MoveCounter moveCount={BitHistory.length - 1} />
-  //     <Timer bitHistory={BitHistory} problem={problem} />
-  //     <BitOperationButtonContainer>
-  //       {problem.operations.map((operation, index) => (
-  //         <BitOperationButton key={index} dispatchBitHistory={dispatchBitHistory} operation={operation} />
-  //       ))}
-  //     </BitOperationButtonContainer>
-  //     <UndoButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
-  //     <RetryButton bitHistory={BitHistory} dispatchBitHistory={dispatchBitHistory} />
-  //     <div>
-  //       <ReturnToProblemSelectionButton setStatus={setStatus} />
-  //     </div>
-  //     <div>
-  //       BitHistory: {BitHistory.toString()}
-  //     </div>
-  //   </div>
-  // );
 }
 function Title(){
   return (
