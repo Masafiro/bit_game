@@ -25,7 +25,9 @@ type BitHistoryOperation =
   | {operation_type: "clear"}
 
 type Status =
+  | {status_type: "TitleScreen"}
   | {status_type: "ProblemSelectionScreen"}
+  | {status_type: "TimeAttackSelectionScreen"}
   | {status_type: "ProblemModeGameScreen", problem_file: string}
   | {status_type: "TimeAttackModeGameScreen", time_attack_file: string}
 
@@ -189,12 +191,44 @@ function ProblemButton({ problemName, problemFile, setStatus }: { problemName: s
   );
 }
 
-function TimeAttackButton({timeAttackFile, setStatus }: { timeAttackFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
+function TimeAttackButtonContainer({children}: {children: React.ReactNode }) {
+    return (
+        <div className="timeAttackButtonContainer">
+            {children}
+        </div>
+    )
+}
+
+function TimeAttackButton({timeAttackName, timeAttackFile, setStatus }: {timeAttackName: string, timeAttackFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
   return (
     <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
-      タイムアタック
+      {timeAttackName} 
     </button>
   );
+}
+
+function ProblemModeButton({setStatus}: {setStatus: React.Dispatch<React.SetStateAction<Status>>;}){
+    return (
+        <button className="problemModeButton" onClick={() => setStatus({status_type: "ProblemSelectionScreen"})}>
+          問題を解く
+        </button>
+    );
+}
+function TimeAttackModeButton({setStatus}: {setStatus: React.Dispatch<React.SetStateAction<Status>>;}){
+    return (
+        <button className="problemModeButton" onClick={() => setStatus({status_type: "TimeAttackSelectionScreen"})}>
+          タイムアタックをする
+        </button>
+    );
+}
+function ModeSelection({setStatus}: {setStatus: React.Dispatch<React.SetStateAction<Status>>; })
+{
+    return (
+        <div>
+            <ProblemModeButton setStatus={setStatus}/>
+            <TimeAttackModeButton setStatus={setStatus}/>
+        </div>
+    );
 }
 
 function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<Status>>}) {
@@ -205,7 +239,6 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
         <ProblemButton problemName="Problem 2" problemFile="problem2.json" setStatus={setStatus} />
         <ProblemButton problemName="Problem 3" problemFile="problem3.json" setStatus={setStatus} />
       </ProblemButtonContainer>
-      <TimeAttackButton timeAttackFile="time_attack1.json" setStatus={setStatus} />
     </div>
   );
 }
@@ -216,6 +249,18 @@ function ReturnToProblemSelectionButton({ setStatus } : { setStatus : React.Disp
       戻る
     </button>
   )
+}
+
+// タイムアタックにおける選択画面
+function TimeAttackSelection({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<Status>>}){
+    return(
+        <div>
+           <TimeAttackButtonContainer>
+           <TimeAttackButton timeAttackName="timeAttack 1" timeAttackFile="time_attack1.json" setStatus={setStatus} />
+           <TimeAttackButton timeAttackName="timeAttack 2" timeAttackFile="time_attack1.json" setStatus={setStatus} />
+           </TimeAttackButtonContainer>
+        </div>
+    );
 }
 
 function MoveCounter({ moveCount } : { moveCount : number }){
@@ -244,6 +289,7 @@ function Timer({ bitHistory, problem }: { bitHistory: BitHistory, problem: Probl
     </div>
   )
 }
+
 function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFileName: string}) {
   const [bitHistory, dispatchBitHistory] = useReducer(BitHistoryReducer, []);
   const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
@@ -413,8 +459,15 @@ function DebugInfo({ status } : {status: Status }){
 }
 
 export default function Home() {
-  const [status, setStatus] = useState<Status>({status_type: "ProblemSelectionScreen"});
+  const [status, setStatus] = useState<Status>({status_type: "TitleScreen"});
   switch (status.status_type){
+    case "TitleScreen":
+        return(
+          <div>
+            <Title />
+            <ModeSelection setStatus={setStatus} />
+          </div>
+        );
     case "ProblemSelectionScreen":
       return (
         <div>
@@ -423,6 +476,13 @@ export default function Home() {
           <DebugInfo status={status} />
         </div>
       );
+    case "TimeAttackSelectionScreen":
+        return(
+        <div>
+            <Title />
+            <TimeAttackSelection setStatus={setStatus} />
+        </div>
+        );
     case "ProblemModeGameScreen":
       return (
         <div>
