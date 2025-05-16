@@ -5,8 +5,7 @@
   "homepage": "https://masafiro.github.io/bit_game",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
-    "postbuild": "node scripts/restructureOut.js",
+    "build": "next build && node scripts/restructureOut.js",
     "start": "next start",
     "lint": "next lint",
     "predeploy": "npm run build",
