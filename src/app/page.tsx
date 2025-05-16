@@ -169,28 +169,36 @@ function ProblemButtonContainer({ children }: { children: React.ReactNode }) {
 }
 
 function ProblemButton({ problemName, problemFile, setStatus }: { problemName: string, problemFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
-  return (
-    <button className="problemButton" onClick={() => setStatus({status_type: "ProblemModeGameScreen", problem_file: problemFile})}>
-      {problemName}
-    </button>
-  );
-}
-
-
-function TimeAttackButtonContainer({children}: {children: React.ReactNode }) {
+  if (localStorage.getItem(problemFile) == "true"){
     return (
-        <div className="timeAttackButtonContainer">
-            {children}
-        </div>
-    )
+      <button className="problemButton" onClick={() => setStatus({status_type: "ProblemModeGameScreen", problem_file: problemFile})}>
+        {problemName} (solved)
+      </button>
+    );
+  } else {
+    return (
+      <button className="problemButton" onClick={() => setStatus({status_type: "ProblemModeGameScreen", problem_file: problemFile})}>
+        {problemName} (unsolved)
+      </button>
+    );
+  }
 }
 
-function TimeAttackButton({timeAttackName, timeAttackFile, setStatus }: {timeAttackName: string, timeAttackFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
-  return (
-    <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
-      {timeAttackName} 
-    </button>
-  );
+function TimeAttackButton({ timeAttackFile, setStatus }: { timeAttackFile: string, setStatus: React.Dispatch<React.SetStateAction<Status>> }) {
+  const bestTime = localStorage.getItem(timeAttackFile);
+  if (bestTime === null){
+    return (
+      <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
+      タイムアタック
+      </button>
+    );
+  } else {
+    return (
+      <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
+      タイムアタック (ベストタイム: {Number(bestTime) / 1000} 秒)
+      </button>
+    );
+  }
 }
 
 function ProblemModeButton({setStatus}: {setStatus: React.Dispatch<React.SetStateAction<Status>>;}){
@@ -225,6 +233,8 @@ function ModeSelection({setStatus}: {setStatus: React.Dispatch<React.SetStateAct
 }
 
 function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<Status>>}) {
+  const solvedproblem1 = localStorage.getItem('problem1.json');
+  console.log(solvedproblem1);
   return (
     <div>
       <ProblemButtonContainer>
@@ -291,25 +301,25 @@ function MoveCounter({ moveCount } : { moveCount : number }){
   );
 }
 
-function Timer({ isActive }: { isActive : boolean }){
-  const [count, setCount] = useState<number>(0);
+function Timer({ isActive, time, setTime }: { isActive : boolean, time: number, setTime: React.Dispatch<React.SetStateAction<number>>}){
   useEffect(() => {
     if (isActive){
       const timer = setTimeout(() => {
-        setCount(count + 100);
+        setTime(time + 100);
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [count]);
+  }, [time]);
   return (
     <div>
-      タイム: {count / 1000}秒
+      タイム: {time / 1000}秒
     </div>
   )
 }
 function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Dispatch<React.SetStateAction<Status>>, problemFileName: string}) {
   const [bitHistory, dispatchbitHistory] = useReducer(bitHistoryReducer, []);
   const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
+  const [time, setTime] = useState<number>(0);
 
   useEffect(() => {
     async function fetchProblem() {
@@ -336,6 +346,11 @@ function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Disp
     fetchProblem();
   }, []);
 
+  if (bitHistory[bitHistory.length - 1] === problem.target){
+    console.log("solved ", problemFileName);
+    localStorage.setItem(problemFileName, "true");
+  }
+
   return (
     <div>
       <div>
@@ -343,7 +358,7 @@ function ProblemModeGame({ setStatus, problemFileName }: { setStatus: React.Disp
       </div>
       <BitDisplay currentBits={bitHistory[bitHistory.length - 1]} />
       <MoveCounter moveCount={bitHistory.length - 1} />
-      <Timer isActive={bitHistory[bitHistory.length - 1] !== problem.target} />
+      <Timer isActive={bitHistory[bitHistory.length - 1] !== problem.target} time={time} setTime={setTime} />
       <BitOperationButtonContainer>
         {problem.operations.map((operation, index) => (
           <BitOperationButton key={index} dispatchbitHistory={dispatchbitHistory} operation={operation} />
@@ -369,6 +384,7 @@ function TimeAttackModeGame({ setStatus, timeAttackFileName }: { setStatus: Reac
   const [currentProblem, setcurrentProblem] = useState<number>(0);
   const [problem, setProblem] = useState<Problem>({bit_length: 0, start: "", target: "", operation_count: 0, operations: [], minimum_moves: 0});
   const [bitHistory, dispatchbitHistory] = useReducer(bitHistoryReducer, []);
+  const [time, setTime] = useState<number>(0);
 
   useEffect(() => {
     async function fetchTimeAttack() {
@@ -430,6 +446,13 @@ function TimeAttackModeGame({ setStatus, timeAttackFileName }: { setStatus: Reac
         setTimeout(() => {
           setcurrentProblem(nextSolvedProblemCount + 1);
         }, 1000);
+      } else {
+        const solveTime = time + 100;
+        if (localStorage.getItem(timeAttackFileName) == null){
+          localStorage.setItem(timeAttackFileName, solveTime.toString());
+        } else {
+          localStorage.setItem(timeAttackFileName, Math.min(Number(localStorage.getItem(timeAttackFileName)), solveTime).toString())
+        }
       }
     }
   }, [bitHistory]);
@@ -445,7 +468,7 @@ function TimeAttackModeGame({ setStatus, timeAttackFileName }: { setStatus: Reac
       </div>
       <BitDisplay currentBits={bitHistory[bitHistory.length - 1]} />
       <MoveCounter moveCount={bitHistory.length - 1} />
-      <Timer isActive={timeAttack.problem_count == 0 || solvedProblemCount < timeAttack.problem_count} />
+      <Timer isActive={timeAttack.problem_count == 0 || solvedProblemCount < timeAttack.problem_count} time={time} setTime={setTime} />
       <BitOperationButtonContainer>
         {problem.operations.map((operation, index) => (
           <BitOperationButton key={index} dispatchbitHistory={dispatchbitHistory} operation={operation} />
