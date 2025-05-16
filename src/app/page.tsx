@@ -234,7 +234,9 @@ function ProblemSelection({ setStatus }: { setStatus: React.Dispatch<React.SetSt
         <ProblemButton problemName="Problem 4" problemFile="problem3.json" setStatus={setStatus} />
         <ProblemButton problemName="Problem 5" problemFile="problem3.json" setStatus={setStatus} />
       </ProblemButtonContainer>
-      <ReturnToTitleButton  setStatus={setStatus} />
+      <div className="returnContainer">
+           <ReturnToTitleButton setStatus={setStatus} />
+           </div>
     </div>
   );
 }
@@ -271,8 +273,11 @@ function TimeAttackSelection({ setStatus }: { setStatus: React.Dispatch<React.Se
            <TimeAttackButtonContainer>
            <TimeAttackButton timeAttackName="5桁 1手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
            <TimeAttackButton timeAttackName="5桁 2手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
+           <TimeAttackButton timeAttackName="5桁 3手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
            </TimeAttackButtonContainer>
+           <div className="returnContainer">
            <ReturnToTitleButton setStatus={setStatus} />
+           </div>
         </div>
     );
 }

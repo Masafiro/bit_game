@@ -78,7 +78,7 @@ body {
 }
 
 .timeAttackButtonContainer {
-  display: flex;
+  display: grid;
   justify-content: center;
   align-items: center;
   height: 10vh;
@@ -123,6 +123,12 @@ body {
   cursor: pointer;
   margin: 8px;
 }
+
+.returnContainer {
+    text-align: left;     /* 中央寄せ */
+    margin-top: 10px;       /* 上に余白 */
+}
+  
 
 .returnToTitleButton {
   left: 10%;
