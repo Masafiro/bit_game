@@ -193,7 +193,7 @@ function TimeAttackButton({ timeAttackFile, setStatus }: { timeAttackFile: strin
   } else {
     return (
       <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
-      タイムアタック (ベストタイム: {bestTime / 1000} 秒)
+      タイムアタック (ベストタイム: {Number(bestTime) / 1000} 秒)
       </button>
     );
   }
