@@ -10,7 +10,7 @@ if (!fs.existsSync(targetDir)) {
 }
 
 // 移動対象のファイルとディレクトリ
-const itemsToMove = ["_next", "favicon.ico"];
+const itemsToMove = ["_next", "favicon.ico", "index.html"];
 
 // out 内の指定されたファイルやディレクトリを bit_game ディレクトリに移動
 itemsToMove.forEach((item) => {
