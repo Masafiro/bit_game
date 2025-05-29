@@ -267,12 +267,13 @@ void output(dataset &d, int inc){
     cout << endl;
 }
 
-
+// jsonファイルとして出力
 string to_bitstr(unsigned int x, int len){
     constexpr int W = 32;
     string s = bitset<W>(x).to_string();
     return s.substr(W - len);
 }
+
 void to_json(json& j, const dataset& ds){
     json j_ops = json::array();
     for (const auto& [type, param] : ds.operation) {
@@ -299,6 +300,7 @@ void to_json(json& j, const dataset& ds){
         }
     };
 }
+
 json to_json_answer(const dataset& ds){
     json j;
     j["minimum_moves"] = ds.turn_min;
@@ -360,9 +362,9 @@ int main(){
     }
 
     // 問題の生成をproblemnum回繰り返す
-    int reqcnt = 0;
+    //int reqcnt = 0;
     while(problemnum){
-        reqcnt++;
+        //reqcnt++;
         unsigned int start;
         unsigned int target;
         while(true){
@@ -404,6 +406,18 @@ int main(){
                 }
             }
         }
+        // 同じ操作が含まれていたら却下
+        bool duplicated = false;
+        for(int i = 0; i < operationnum - 1; i++){
+            for(int j = i + 1; j < operationnum; j++){
+                if(operation[i].first == operation[j].first && operation[i].second == operation[j].second){
+                    duplicated = true;
+                    break;
+                }
+            }
+        }
+        if(duplicated) continue;
+
         // 操作列をランダムにする
         shuffle(operation.begin(), operation.end(), mt); 
 
@@ -417,7 +431,7 @@ int main(){
         if(movenum_min > result.size() || result.size() > movenum_max)continue;
         dataset_vec.push_back(d);
         problemnum--;
-        reqcnt = 0;
+        //reqcnt = 0;
     }
 
     //出力
