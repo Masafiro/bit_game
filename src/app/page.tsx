@@ -196,9 +196,11 @@ function TimeAttackButton({ timeAttackName, timeAttackFile, setStatus }: { timeA
   const bestTime = localStorage.getItem(timeAttackFile);
   if (bestTime === null){
     return (
-      <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
-        {timeAttackName}
-      </button>
+      <div>
+        <button className="timeAttackButton" onClick={() => setStatus({status_type: "TimeAttackModeGameScreen", time_attack_file: timeAttackFile})}>
+          {timeAttackName}
+        </button>
+      </div>
     );
   } else {
     return (
@@ -283,22 +285,22 @@ function ReturnToTitleButton({ setStatus } : { setStatus : React.Dispatch<React.
     )
 }
 
-// タイムアタックにおける選択画面
 function TimeAttackSelection({ setStatus }: { setStatus: React.Dispatch<React.SetStateAction<Status>>}){
-    return(
-        <div>
-           <TimeAttackButtonContainer>
-           <TimeAttackButton timeAttackName="5桁 1手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
-           <TimeAttackButton timeAttackName="5桁 2手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
-           <TimeAttackButton timeAttackName="5桁 3手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
-           </TimeAttackButtonContainer>
-           <div className="returnContainer">
-           <ReturnToTitleButton setStatus={setStatus} />
-           </div>
-        </div>
-    );
+  return(
+    <div>
+      <div>
+      <TimeAttackButtonContainer>
+        <TimeAttackButton timeAttackName="5桁 1手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
+        <TimeAttackButton timeAttackName="5桁 2手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
+        <TimeAttackButton timeAttackName="5桁 3手 10問" timeAttackFile="time_attack1.json" setStatus={setStatus} />
+      </TimeAttackButtonContainer>
+      </div>
+      <div>
+        <ReturnToTitleButton setStatus={setStatus} />
+      </div>
+    </div>
+  );
 }
-
 
 function MoveCounter({ moveCount } : { moveCount : number }){
   return (
